@@ -3,17 +3,16 @@ import micropython, socket
 from yuri.http.processor import Processor
 from yuri.http.config import default as default_config
 
-VERSION = "0.2"
 SO_REGISTER_HANDLER = 20
 
 
 class TCPServer:
-    def __init__(self, handlers: list, config: dict):
+    def __init__(self, processor: Processor, config: dict):
         self._port = config['port']
         self._address = config['address']
         self._timeout = config['timeout']
         self._server_socket = None
-        self._processor = Processor(handlers, config)
+        self._processor = processor
 
     def handle_receive(self, client_socket, tcp_request):
         gc.collect()
@@ -54,11 +53,3 @@ class TCPServer:
     def stop(self):
         if self._server_socket:
             self._server_socket.close()
-
-
-if __name__ == '__main__':
-    server = TCPServer(default_config())
-    server.start()
-    while True:
-        time.sleep(0.2)
-        print(time.time())

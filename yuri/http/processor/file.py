@@ -9,7 +9,7 @@ CONTENT_TYPE_MAP = {
 }
 
 
-class Handler:
+class FileProcess:
     def __init__(self, root_path='/www', block_size=1024):
         if not self.exists(root_path) or not self.is_dir(root_path):
             msg = "Root path {} is not an existing directory".format(root_path)

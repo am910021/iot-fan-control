@@ -19,42 +19,43 @@ class Config:
         self.http = {}
         self.ap = {}
         self.wifi = {}
-        if self.hasConfig2File():
-            self.loadConfig()
+        self.default_is_loaded=False
+        if self.has_config_file():
+            self.load_config()
         else:
-            self.loadDefault()
-            self.saveConfig()
+            self.load_default()
         gc.collect()
 
     def get_id(self):
         return self._id
 
-    def loadDefault(self):
+    def load_default(self):
         self.dev_mode = True
 
-        self.http['bind_addr'] = '0.0.0.0'
+        self.http['address'] = '0.0.0.0'
         self.http['port'] = 80
         self.http['timeout'] = 15
         self.http['require_auth'] = False
-        self.http['realm'] = "esp8266"
+        self.http['realm'] = "esp"
         self.http['user'] = "admin"
-        self.http['password'] = "uhttpD"
+        self.http['password'] = ""
         self.http['max_headers'] = 10
         self.http['max_content_length'] = 1024
 
         self.ap['enable'] = True
-        self.ap['essid'] = 'esp8266'
-        self.ap['password'] = '0123456789'
+        self.ap['ssid'] = ''
+        self.ap['password'] = ''
 
         self.wifi['enable'] = False
-        self.wifi['essid'] = ''
+        self.wifi['ssid'] = ''
         self.wifi['password'] = ''
+        self.default_is_loaded=True
 
-    def hasConfig2File(self):
+    def has_config_file(self):
         folders = os.listdir()
         return 'config.txt' in folders
 
-    def saveConfig(self):
+    def save_config(self):
         setting = {}
         setting['dev_mode'] = self.dev_mode
         setting['http'] = self.http
@@ -63,7 +64,7 @@ class Config:
         with open('config.txt', 'w') as jsonfile:
             json.dump(setting, jsonfile)
 
-    def loadConfig(self):
+    def load_config(self):
         try:
             with open('config.txt', 'r') as jsonfile:
                 data = json.load(jsonfile)
@@ -72,7 +73,7 @@ class Config:
                 ap = data['ap']
                 wifi = data['wifi']
 
-                self.http['bind_addr'] = http['bind_addr']
+                self.http['address'] = http['address']
                 self.http['port'] = int(http['timeout'])
                 self.http['timeout'] = int(http['timeout'])
                 self.http['require_auth'] = http['require_auth'] is True
@@ -83,11 +84,11 @@ class Config:
                 self.http['max_content_length'] = int(http['max_content_length'])
 
                 self.ap['enable'] = ap['enable'] is True
-                self.ap['essid'] = ap['essid']
+                self.ap['ssid'] = ap['ssid']
                 self.ap['password'] = ap['password']
 
                 self.wifi['enable'] = wifi['enable'] is True
-                self.wifi['essid'] = wifi['essid']
+                self.wifi['ssid'] = wifi['ssid']
                 self.wifi['password'] = wifi['password']
                 gc.collect()
         except:
@@ -95,4 +96,3 @@ class Config:
 
 
 config = Config.get_instance()
-

@@ -32,21 +32,21 @@ class Logger:
     def debug(self,message, *args, **kwargs):
         if not Logger.DEBUG in self._levels:
             return
-        print('[Debug]:'+message.format(*args, **kwargs))
+        print('[Debug] '+message.format(*args, **kwargs))
     
     def info(self,message, *args, **kwargs):
         if not Logger.INFO in self._levels:
             return
-        print('[Info]:'+message.format(*args, **kwargs))
+        print('[Info] '+message.format(*args, **kwargs))
         
     def warning(self,message, *args, **kwargs):
         if not Logger.WARNING in self._levels:
             return
-        print('[Warning]:'+message.format(*args, **kwargs))
+        print('[Warning] '+message.format(*args, **kwargs))
     
     def error(self,message, *args, **kwargs):
         if not Logger.ERROR in self._levels:
             return
-        print('[Error]:'+message.format(*args, **kwargs))
+        print('[Error] '+message.format(*args, **kwargs))
         
 logger = Logger.get_instance()

@@ -1,4 +1,4 @@
-INCLUDE = 'yuri,esp8266,pi_pico,uhttpd' #要編譯的資料夾
+INCLUDE = 'yuri,esp8266,pi_pico,uhttpd,esp-series' #要編譯的資料夾
 
 PWD = $(shell pwd)
 LOCATE = $(shell pwd)/
