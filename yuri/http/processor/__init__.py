@@ -1,13 +1,19 @@
-import gc, sys
+import gc
+import sys
 from yuri.logger import logger
 from ..share import *
 
+logger.setLevels([1])
+
 
 class Processor:
-    def __init__(self, handlers:list, config: dict):
+    def __init__(self, handlers: list, config: dict):
         self._handlers = handlers
         self._config = config
         self._dev = self._config['dev']
+        logger.info('Http processor initialize finish, waiting tcp server setup.')
+        if self._dev:
+            logger.info('Http processor running on developer mode.')
 
     def handle_request(self, client_socket, tcp_request):
         http_request = {
@@ -73,40 +79,30 @@ class Processor:
             if self._config['require_auth']:
                 if 'authorization' not in headers:
                     return self.unauthorized_error(client_socket)
-
-                remote = tcp_request['remote']
-                if not self.is_authorized(headers['authorization']):
-                    logger.info("UNAUTHORIZED {}".format(remote))
-                    return self.unauthorized_error(client_socket)
-
-                logger.info("AUTHORIZED {}".format(remote))
-
+                else:
+                    remote = tcp_request['remote']
+                    if not self.is_authorized(headers['authorization']):
+                        logger.info("UNAUTHORIZED {}".format(remote))
+                        return self.unauthorized_error(client_socket)
+                    else:
+                        logger.info("AUTHORIZED {}".format(remote))
             #
             # get the response from the active handler and serialize it
             #
             response = handler.handle_request(http_request)
             return self.response(client_socket, response)
         except BadRequestException as e:
-            print(1)
             return Processor.bad_request_error(client_socket, e)
         except ForbiddenException as e:
-            print(2)
             return Processor.forbidden_error(client_socket, e)
         except NotFoundException as e:
-            print(3)
             return Processor.not_found_error(client_socket, e)
         except BaseException as e:
-            print(4)
             return Processor.internal_server_error(client_socket, e)
         except NameError as e:
             return Processor.internal_server_error(client_socket, e)
         finally:
-            print(6)
             gc.collect()
-
-    #
-    # Internal operations
-    #
 
     @staticmethod
     def parse_heading(line):
@@ -181,10 +177,9 @@ class Processor:
         #
         # write the heading and headers
         #
-        response['headers']['Server'] = Processor.server_name()
         stream.write("{}\r\n{}\r\n".format(
             Processor.format_heading(response['code']),
-            Processor.format_headers(response)
+            Processor.format_headers(dict_update(response['headers'], {'Server': Processor.server_name()}))
         ).encode('UTF-8'))
         #
         # Write the body, if it's present
@@ -225,8 +220,8 @@ class Processor:
     @staticmethod
     def error(client_socket, code, error_message, e, headers):
         ef = lambda stream: Processor.stream_error(stream, error_message, e)
-        response = Processor.generate_error_response(code, ef, headers={})
-        return Processor.response(response)
+        response = Processor.generate_error_response(code, ef, headers)
+        return Processor.response(client_socket, response)
 
     @staticmethod
     def stream_error(stream, error_message, e):
@@ -250,7 +245,7 @@ class Processor:
         data2 = '</body></html>'.encode('UTF-8')
         return {
             'code': code,
-            'headers': Processor.update({
+            'headers': dict_update({
                 'content-type': "text/html",
             }, headers),
             'body': lambda stream: Processor.write_html(stream, data1, ef, data2)

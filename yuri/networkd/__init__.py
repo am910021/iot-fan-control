@@ -1,5 +1,5 @@
 import gc, sys, os, time, network
-from .config import config as gConfig
+from ..config import config as gConfig
 from yuri.logger import logger
 from yuri.stream import Stream
 
@@ -13,12 +13,23 @@ class NetworkHelper:
         self.info['wifi'] = {}
 
     def do_connect(self):
-        if not gConfig.wifi['enable'] or NetworkHelper._CLOSED:
+        if NetworkHelper._CLOSED:
             return
 
         wlan = network.WLAN(network.STA_IF)
+
+        # 判斷config是否有啟用網路功能
+        if not gConfig.wifi['enable']:
+            wlan.active(False)
+            return
+
+        # 重啟網路
+        if wlan.active():
+            wlan.active(True)
+
         wlan.active(True)
 
+        # 嚐試連線到wifi直到連上or試過10次
         count = 0
         while True and count < 10:
             if wlan.isconnected() and \
@@ -46,6 +57,9 @@ class NetworkHelper:
             return
 
         ap = network.WLAN(network.AP_IF)  # create access-point interface
+        if not gConfig.ap['enable']:
+            ap.active(False)
+            return
 
         # 如果沒有config.txt檔案，就寫入預設值進config裡
         if gConfig.default_is_loaded:
@@ -63,10 +77,13 @@ class NetworkHelper:
             gConfig.http['password'] = gConfig.ap['password']
             gConfig.save_config()
 
+        # 重啟網路
+        if ap.active():
+            ap.active(True)
 
         ap.active(True)  # 啟動網路
-        ap.config(authmode=3) # 設定驗證模式
         ap.config(essid=gConfig.ap['ssid'], password=gConfig.ap['password']) # 設定ssid, password
+        ap.config(authmode=3)  # 設定驗證模式
         mac_bytes = ap.config('mac')
         mac = (":".join(["%X" % (c) for c in mac_bytes]))
         aconfig = ap.ifconfig()
@@ -114,7 +131,7 @@ class NetworkHelper:
         del globals()['logger']
         del sys.modules['yuri.logger']
         del globals()['gConfig']
-        del sys.modules['yuri.networkd.config']
+        del sys.modules['yuri.config']
         del sys.modules['yuri']
         del globals()['network']
         del globals()['time']

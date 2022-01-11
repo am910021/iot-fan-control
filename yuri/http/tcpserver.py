@@ -1,7 +1,7 @@
-import sys, gc, time
+import gc
 import micropython, socket
 from yuri.http.processor import Processor
-from yuri.http.config import default as default_config
+from yuri.logger import logger
 
 SO_REGISTER_HANDLER = 20
 
@@ -49,6 +49,7 @@ class TCPServer:
         self._server_socket.bind((self._address, self._port))
         self._server_socket.listen(0)
         self._server_socket.setsockopt(socket.SOL_SOCKET, SO_REGISTER_HANDLER, self.handle_accept)
+        logger.info('Server listen on: {} , port: {}'.format(self._address, self._port))
 
     def stop(self):
         if self._server_socket:
