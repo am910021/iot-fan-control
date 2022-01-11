@@ -13,10 +13,10 @@ clean:
 
 create_folder:
 	@mkdir -p build/mpy
-	@mkdir -p build/dist
+	@mkdir -p build/dist/lib
 
 copy_to_dist:
-	@cp -R build/mpy/yuri build/dist
+	@cp -R build/mpy/yuri build/dist/lib
 	@cp -R www build/dist/www
 	@cp build/mpy/esp-series/networkd.mpy build/dist
 	@cp build/mpy/esp-series/yhttpd.mpy build/dist

@@ -140,7 +140,7 @@ class FileProcess:
         data = "<html><body>{}</body></html>".format(message).encode('UTF-8')
         length = len(data)
         body = lambda stream: stream.write(data)
-        return Handler.create_response(code, "text/html", length, body)
+        return FileProcess.create_response(code, "text/html", length, body)
 
     def create_dir_listing_response(self, absolute_path):
         length, body = self.generate_dir_listing(absolute_path)

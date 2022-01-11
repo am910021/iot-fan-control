@@ -9,7 +9,7 @@ class Handler:
         pass
     
     def get(self, api_request):
-        #print(api_request['http']['dev'])
+        #print(api_request['http']['debug'])
 
         info = {}
         with open('/tmp/interface.bin', 'rb') as f:

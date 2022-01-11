@@ -9,8 +9,8 @@ class Handler:
     
     def get(self, api_request):
         params = api_request['query_params']
-        #if not api_request['http']['dev']:
-        #    return {'msg': 'dev mode can\'t control fan.'}
+        #if not api_request['http']['debug']:
+        #    return {'msg': 'debug mode can\'t control fan.'}
         
         if not params or not 'ctrl' in params:
             return {'msg': 'params error.'}

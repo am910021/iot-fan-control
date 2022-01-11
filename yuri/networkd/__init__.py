@@ -41,8 +41,8 @@ class NetworkHelper:
             time.sleep(5)
             count += 1
 
-        self.info['wifi']['ssid'] = gConfig.ap['ssid']
-        self.info['wifi']['password'] = gConfig.ap['password']
+        self.info['wifi']['ssid'] = gConfig.wifi['ssid']
+        self.info['wifi']['password'] = gConfig.wifi['password']
         self.info['wifi']['ip'] = wlan.ifconfig()[0]
         self.info['wifi']['mac'] = (":".join(["%X" % (c) for c in wlan.config('mac')]))
 

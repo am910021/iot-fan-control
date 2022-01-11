@@ -7,7 +7,7 @@ class Handler:
         pass
     
     def get(self, api_request):
-        #print('dev', api_request['http']['dev'])
+        #print('debug', api_request['http']['debug'])
         
         params = api_request['query_params']
         

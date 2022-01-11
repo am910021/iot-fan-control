@@ -3,29 +3,30 @@ import sys
 from yuri.logger import logger
 from ..share import *
 
-logger.setLevels([1])
+logger.setLevels([3])
 
 
 class Processor:
+    DEBUG_MODE = False
+
     def __init__(self, handlers: list, config: dict):
         self._handlers = handlers
         self._config = config
-        self._dev = self._config['dev']
+        self._debug = self._config['debug']
+        Processor.DEBUG_MODE = self._debug
         logger.info('Http processor initialize finish, waiting tcp server setup.')
-        if self._dev:
+        if self._debug:
             logger.info('Http processor running on developer mode.')
 
     def handle_request(self, client_socket, tcp_request):
         http_request = {
             'tcp': tcp_request,
-            'dev': self._dev,
+            'debug': self._debug,
             'ver': VERSION
         }
         try:
             gc.collect()
-            #
-            # parse out the heading line, to get the verb, path, and protocol
-            #
+
             heading = self.parse_heading(client_socket.readline().decode('UTF-8'))
             http_request.update(heading)
             #
@@ -57,7 +58,7 @@ class Processor:
                     raise BadRequestException("Number of headers exceeds maximum allowable")
             http_request['headers'] = headers
             #
-            # If the headers have a content length, then read the body
+            # 標頭封包有資料(length)就讀取內容
             #
             content_length = 0
             if 'content-length' in headers:
@@ -68,7 +69,7 @@ class Processor:
                 body = client_socket.read(content_length)
                 http_request['body'] = body
             #
-            # If there is no handler, then raise a NotFound exception
+            # 如果handler不存在，就送出NotFoundException
             #
             if not handler:
                 raise NotFoundException("No Handler for path {}".format(path))
@@ -100,6 +101,8 @@ class Processor:
         except BaseException as e:
             return Processor.internal_server_error(client_socket, e)
         except NameError as e:
+            return Processor.internal_server_error(client_socket, e)
+        except Exception as e:
             return Processor.internal_server_error(client_socket, e)
         finally:
             gc.collect()
@@ -137,7 +140,7 @@ class Processor:
 
     @staticmethod
     def server_name():
-        return "{}/{} (running in your devices)".format(SERVER_NAME, VERSION)
+        return "{}/{}".format(SERVER_NAME, VERSION)
 
     @staticmethod
     def format_heading(code):
@@ -218,7 +221,7 @@ class Processor:
         return Processor.error(client_socket, 500, error_message, e)
 
     @staticmethod
-    def error(client_socket, code, error_message, e, headers):
+    def error(client_socket, code, error_message, e, headers={}):
         ef = lambda stream: Processor.stream_error(stream, error_message, e)
         response = Processor.generate_error_response(code, ef, headers)
         return Processor.response(client_socket, response)
@@ -226,7 +229,7 @@ class Processor:
     @staticmethod
     def stream_error(stream, error_message, e):
         stream.write(error_message)
-        if e:
+        if e and Processor.DEBUG_MODE:
             stream.write('<pre>')
             stream.write(Processor.stacktrace(e))
             stream.write('</pre>')

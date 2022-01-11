@@ -30,8 +30,7 @@ class Config:
         return self._id
 
     def load_default(self):
-        self.dev_mode = True
-
+        self.http['debug'] = False
         self.http['address'] = '0.0.0.0'
         self.http['port'] = 80
         self.http['timeout'] = 15
@@ -57,7 +56,6 @@ class Config:
 
     def save_config(self):
         setting = {}
-        setting['dev_mode'] = self.dev_mode
         setting['http'] = self.http
         setting['ap'] = self.ap
         setting['wifi'] = self.wifi
@@ -68,13 +66,13 @@ class Config:
         try:
             with open('config.txt', 'r') as jsonfile:
                 data = json.load(jsonfile)
-                self.dev_mode = data['dev_mode'] is True
                 http = data['http']
                 ap = data['ap']
                 wifi = data['wifi']
 
+                self.http['debug'] = http['debug'] is True
                 self.http['address'] = http['address']
-                self.http['port'] = int(http['timeout'])
+                self.http['port'] = int(http['port'])
                 self.http['timeout'] = int(http['timeout'])
                 self.http['require_auth'] = http['require_auth'] is True
                 self.http['realm'] = http['realm']
@@ -91,7 +89,7 @@ class Config:
                 self.wifi['ssid'] = wifi['ssid']
                 self.wifi['password'] = wifi['password']
                 gc.collect()
-        except:
+        except IndexError:
             raise Exception('The config.txt key/value attribute is wrong, please check the file or delete it.')
 
 
