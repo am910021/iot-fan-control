@@ -5,7 +5,7 @@ from yuri.http.tcpserver import TCPServer
 from yuri.http.config import default as default_config
 from yuri.http.processor.api import ApiProcess
 from yuri.http.processor.file import FileProcess
-from yuri.http.handler import my_api, my_api2, api3, info, fan_control
+from yuri.http.handler import my_api, my_api2, api3, network_info, fan_control
 from yuri.http.processor import Processor
 
 
