@@ -4,7 +4,8 @@ from yuri.config import config as gConfig
 from yuri.http.tcpserver import TCPServer
 from yuri.http.processor.api import ApiProcess
 from yuri.http.processor.file import FileProcess
-from yuri.http.handler import my_api, my_api2, api3, info, fan_control
+from yuri.http.handler import my_api, my_api2, api3, fan_control
+from yuri.http.handler.network import info, edit
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
@@ -19,7 +20,8 @@ api_handler = ApiProcess([
     (['test'], my_api.Handler()),
     (['test2'], my_api2.Handler()),
     (['test3'], api3.Handler()),
-    (['info'], info.Handler()),
+    (['network', 'info'], info.Handler()),
+    (['network', 'edit'], edit.Handler()),
     (['fan'], fan_control.Handler())
 ])
 

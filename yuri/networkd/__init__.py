@@ -108,11 +108,19 @@ class NetworkHelper:
             os.mkdir('/tmp')
 
         stream = Stream()
-        stream.writeStr(self.info['ap']['ssid'])
-        stream.writeStr(self.info['ap']['password'])
-        stream.writeStr(self.info['ap']['ip'])
-        stream.writeStr(self.info['ap']['mac'])
-        if gConfig.wifi['enable']:
+        if not gConfig.ap['enable']:
+            stream.writeByte(0)
+        else:
+            stream.writeByte(1)
+            stream.writeStr(self.info['ap']['ssid'])
+            stream.writeStr(self.info['ap']['password'])
+            stream.writeStr(self.info['ap']['ip'])
+            stream.writeStr(self.info['ap']['mac'])
+
+        if not gConfig.wifi['enable']:
+            stream.writeByte(0)
+        else:
+            stream.writeByte(1)
             stream.writeStr(self.info['wifi']['ssid'])
             stream.writeStr(self.info['wifi']['password'])
             stream.writeStr(self.info['wifi']['ip'])

@@ -3,7 +3,7 @@ import sys
 from yuri.logger import logger
 from ..share import *
 
-logger.setLevels([3])
+logger.setLevels([0, 1, 2, 3])
 
 
 class Processor:
@@ -64,6 +64,7 @@ class Processor:
             if 'content-length' in headers:
                 content_length = int(headers['content-length'])
             if content_length > self._config['max_content_length']:
+                client_socket.read(content_length)
                 raise BadRequestException("Content size exceeds maximum allowable")
             if content_length > 0:
                 body = client_socket.read(content_length)
@@ -100,10 +101,6 @@ class Processor:
             return Processor.not_found_error(client_socket, e)
         except BaseException as e:
             return Processor.internal_server_error(client_socket, e)
-        except NameError as e:
-            return Processor.internal_server_error(client_socket, e)
-        except Exception as e:
-            return Processor.internal_server_error(client_socket, e)
         finally:
             gc.collect()
 
@@ -116,8 +113,8 @@ class Processor:
                 'path': ra[1],
                 'protocol': ra[2]
             }
-        except IndexError:
-            raise BadRequestException()
+        except IndexError as e:
+            raise BadRequestException("IndexError: {}".format(e))
 
     @staticmethod
     def parse_header(line):
@@ -136,7 +133,7 @@ class Processor:
                 raise BadRequestException(
                     "Unsupported authorization method: {}".format(tmp[0]))
         except Exception as e:
-            raise BadRequestException(e)
+            raise BadRequestException("authorization faild: {}".format(e))
 
     @staticmethod
     def server_name():

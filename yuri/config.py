@@ -35,6 +35,8 @@ class Config:
         self.http['port'] = 80
         self.http['timeout'] = 15
         self.http['require_auth'] = False
+        self.http['require_auth_wifi'] = True
+        self.http['require_auth_ap'] = False
         self.http['realm'] = "esp"
         self.http['user'] = "admin"
         self.http['password'] = ""
@@ -75,6 +77,8 @@ class Config:
                 self.http['port'] = int(http['port'])
                 self.http['timeout'] = int(http['timeout'])
                 self.http['require_auth'] = http['require_auth'] is True
+                self.http['require_auth_wifi'] = http['require_auth_wifi'] is True
+                self.http['require_auth_ap'] = http['require_auth_ap'] is True
                 self.http['realm'] = http['realm']
                 self.http['user'] = http['user']
                 self.http['password'] = http['password']
