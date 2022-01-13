@@ -47,22 +47,32 @@ class Processor:
             #
             headers = {}
             num_headers = 0
+            len_str='content-length'
             while True:
                 line = client_socket.readline()
-                if not line or line == b'\r\n':
-                    break
-                k, v = Processor.parse_header(line.decode('UTF-8'))
-                headers[k.lower()] = v
-                num_headers += 1
-                if num_headers > self._config['max_headers']:
-                    raise BadRequestException("Number of headers exceeds maximum allowable")
+                if num_headers < self._config['max_headers']:
+                    if not line or line == b'\r\n':
+                        break
+                    k, v = Processor.parse_header(line.decode('UTF-8'))
+                    headers[k.lower()] = v
+                    num_headers += 1
+                else:
+                    if not line or line == b'\r\n':
+                        if len_str in headers:
+                            client_socket.read(int(headers[len_str]))
+                        raise BadRequestException("Content size exceeds maximum allowable")
+                    elif len_str in line:
+                        headers = {}
+                        k, v = Processor.parse_header(line.decode('UTF-8'))
+                        headers[k.lower()] = v
+
             http_request['headers'] = headers
             #
             # 標頭封包有資料(length)就讀取內容
             #
             content_length = 0
-            if 'content-length' in headers:
-                content_length = int(headers['content-length'])
+            if len_str in headers:
+                content_length = int(headers[len_str])
             if content_length > self._config['max_content_length']:
                 client_socket.read(content_length)
                 raise BadRequestException("Content size exceeds maximum allowable")
@@ -197,12 +207,12 @@ class Processor:
 
     @staticmethod
     def bad_request_error(client_socket, e):
-        error_message = "Bad Request {}:".format(e)
+        error_message = "Bad Request: {}".format(e)
         return Processor.error(client_socket, 400, error_message, e)
 
     @staticmethod
     def forbidden_error(client_socket, e):
-        error_message = "Forbidden {}:".format(e)
+        error_message = "Forbidden: {}".format(e)
         return Processor.error(client_socket, 403, error_message, e)
 
     @staticmethod
