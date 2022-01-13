@@ -29,11 +29,7 @@ class Processor:
 
             heading = self.parse_heading(client_socket.readline().decode('UTF-8'))
             http_request.update(heading)
-            #
-            # find the handler for the specified path.  If we don't have
-            # one registered, we raise a NotFoundException, but only after
-            # reading the payload.
-            #
+
             path = http_request['path']
             handler = None
             for prefix, h in self._handlers:
@@ -42,25 +38,25 @@ class Processor:
                     http_request['prefix'] = prefix
                     handler = h
                     break
-            #
-            # Parse out the headers
-            #
+
             headers = {}
             num_headers = 0
-            len_str='content-length'
+            len_str = 'content-length'
             while True:
                 line = client_socket.readline()
+                # 如果num_headers小於max_headers，就正常執行。
                 if num_headers < self._config['max_headers']:
                     if not line or line == b'\r\n':
                         break
                     k, v = Processor.parse_header(line.decode('UTF-8'))
                     headers[k.lower()] = v
                     num_headers += 1
+                # 如果heards大於max_headers就清空socket剩下的暫存，並發出http 400。 沒清空暫存socket會錯誤。
                 else:
                     if not line or line == b'\r\n':
                         if len_str in headers:
                             client_socket.read(int(headers[len_str]))
-                        raise BadRequestException("Content size exceeds maximum allowable")
+                        raise BadRequestException("Headers size exceeds maximum allowable")
                     elif len_str in line:
                         headers = {}
                         k, v = Processor.parse_header(line.decode('UTF-8'))
@@ -68,11 +64,12 @@ class Processor:
 
             http_request['headers'] = headers
             #
-            # 標頭封包有資料(length)就讀取內容
+            # 標頭封包有資料(content_length)就讀取內容(content)
             #
             content_length = 0
             if len_str in headers:
                 content_length = int(headers[len_str])
+            # 上傳的資料、檔案的大小超過max_content_length就清空socket剩下的暫存，並發出http 400。 沒清空暫存socket會錯誤。
             if content_length > self._config['max_content_length']:
                 client_socket.read(content_length)
                 raise BadRequestException("Content size exceeds maximum allowable")
@@ -80,7 +77,7 @@ class Processor:
                 body = client_socket.read(content_length)
                 http_request['body'] = body
             #
-            # 如果handler不存在，就送出NotFoundException
+            # 如果handler不存在，就送出NotFoundException,http 404。
             #
             if not handler:
                 raise NotFoundException("No Handler for path {}".format(path))
@@ -98,9 +95,7 @@ class Processor:
                         return self.unauthorized_error(client_socket)
                     else:
                         logger.info("AUTHORIZED {}".format(remote))
-            #
-            # get the response from the active handler and serialize it
-            #
+            # 一切正常，執行最後的handle_request
             response = handler.handle_request(http_request)
             return self.response(client_socket, response)
         except BadRequestException as e:
