@@ -17,7 +17,7 @@ create_folder:
 
 copy_to_dist:
 	@cp -R build/mpy/yuri build/dist/lib
-	@cp -R www build/dist/www
+	@cp -R www build/dist
 	@cp build/mpy/esp-series/networkd.mpy build/dist
 	@cp build/mpy/esp-series/yhttpd.mpy build/dist
 	@cp esp-series/main.py build/dist

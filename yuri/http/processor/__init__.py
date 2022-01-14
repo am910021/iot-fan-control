@@ -95,10 +95,13 @@ class Processor:
                         return self.unauthorized_error(client_socket)
                     else:
                         logger.info("AUTHORIZED {}".format(remote))
+            #
             # 一切正常，執行最後的handle_request
+            #
             response = handler.handle_request(http_request)
             return self.response(client_socket, response)
         except BadRequestException as e:
+            sys.print_exception(e)
             return Processor.bad_request_error(client_socket, e)
         except ForbiddenException as e:
             return Processor.forbidden_error(client_socket, e)
