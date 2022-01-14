@@ -19,11 +19,10 @@ class Processor:
             logger.info('Http processor running on developer mode.')
 
     def handle_request(self, client_socket, tcp_request):
-        http_request = {
-            'tcp': tcp_request,
-            'debug': self._debug,
-            'ver': VERSION
-        }
+        http_request = dict(tcp_request)
+        http_request['debug'] = self._debug
+        http_request['ver'] = VERSION
+
         try:
             gc.collect()
 

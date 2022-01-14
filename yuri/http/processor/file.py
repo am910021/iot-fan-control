@@ -37,7 +37,7 @@ class FileProcess:
         #
         # If the path is forbidden, 403 out
         #
-        remote = http_request['tcp']['remote']
+        remote = http_request['remote']
         if not self.is_prefix(self._root_path, absolute_path):
             logger.info(
                 "FORBIDDEN {} {}".format(remote, absolute_path))
