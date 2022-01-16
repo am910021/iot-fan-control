@@ -67,8 +67,8 @@ def startServer():
 
 def sendLiveSingle():
     stream = Stream()
-    stream.writeByte(0)
-    uart.write(stream.getBytes())
+    stream.write_byte(0)
+    uart.write(stream.get_bytes())
 
 if __name__ == '__main__':
     logger.setLevels([0,1,2,3])

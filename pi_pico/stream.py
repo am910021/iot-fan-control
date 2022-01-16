@@ -162,40 +162,40 @@ if __name__ == '__main__':
     
     #stream = Stream()
     
-    #stream.writeStr("我")
-    #stream.writeInt(-2147483648)
-    #print(stream.getBytes())
+    #stream.write_str("我")
+    #stream.write_int(-2147483648)
+    #print(stream.get_bytes())
     #print(stream._data)
-    #stream.printHex()
-    #print(stream.readStr())
-    #print(stream.readInt())
+    #stream.print_hex()
+    #print(stream.read_str())
+    #print(stream.read_int())
     
-    #stream.writeStr("我我我")
-    #print(stream.readStr())
+    #stream.write_str("我我我")
+    #print(stream.read_str())
     
-    #stream.writeByte(-128)
-    #stream.writeByte(127)
+    #stream.write_byte(-128)
+    #stream.write_byte(127)
 
-    #stream.writeShort(-32768)
-    #stream.writeShort(32767)
+    #stream.write_short(-32768)
+    #stream.write_short(32767)
     
-    #stream.writeInt(-2147483648)
-    #stream.writeInt(2147483647)
+    #stream.write_int(-2147483648)
+    #stream.write_int(2147483647)
     
-    #stream.writeLong(-9223372036854775808)
-    #stream.writeLong(9223372036854775807)
+    #stream.write_long(-9223372036854775808)
+    #stream.write_long(9223372036854775807)
     
-    #stream.printHex()
+    #stream.print_hex()
     #print(stream._data)
 
-    #print(stream.readByte())
-    #print(stream.readByte())
-    #print(stream.readShort())
-    #print(stream.readShort())
-    #print(stream.readInt())
-    #print(stream.readInt())
-    #print(stream.readLong())
-    #print(stream.readLong())
+    #print(stream.read_byte())
+    #print(stream.read_byte())
+    #print(stream.read_short())
+    #print(stream.read_short())
+    #print(stream.read_int())
+    #print(stream.read_int())
+    #print(stream.read_long())
+    #print(stream.read_long())
     
     
     

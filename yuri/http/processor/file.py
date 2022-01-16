@@ -97,12 +97,14 @@ class FileProcess:
 
     def stream_file(self, stream, f):
         buf = self.create_buffer()
+        size = 0
         while True:
             n = f.readinto(buf)
             if n:
-                stream.write(buf[:n])
+                size += stream.write(buf[:n])
             else:
                 break
+        return size
 
     def effective_path(self, path):
         full_path = "{}/{}".format(self._root_path, path).rstrip('/')
@@ -139,7 +141,7 @@ class FileProcess:
     def create_message_response(code, message):
         data = "<html><body>{}</body></html>".format(message).encode('UTF-8')
         length = len(data)
-        body = lambda stream: stream.write(data)
+        body = lambda stream: FileProcess.stream_write(stream, data)
         return FileProcess.create_response(code, "text/html", length, body)
 
     def create_dir_listing_response(self, absolute_path):
@@ -162,7 +164,7 @@ class FileProcess:
             data += "<li><a href=\"{}\">{}</a></li>\n".format(self.to_path(tmp), f)
         data += "</ul></body></html>"
         data = data.encode('UTF-8')
-        body = lambda stream: stream.write(data)
+        body = lambda stream: FileProcess.stream_write(stream, data)
         return len(data), body
 
     def to_path(self, components):
@@ -182,12 +184,16 @@ class FileProcess:
         return ret
 
     @staticmethod
+    def stream_write(stream, data):
+        return stream.write(data)
+
+    @staticmethod
     def create_response(code, content_type, length, body):
         return {
             'code': code,
             'headers': {
                 'content-type': content_type,
-                'content-length': length
+                #'content-length': length
             },
             'body': body
         }

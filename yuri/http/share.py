@@ -13,6 +13,10 @@ def dict_update(a: dict, b: dict):
     return a
 
 
+def count_write(buff):
+    return len(buff), buff
+
+
 class NotFoundException(Exception):
     pass
 
@@ -23,3 +27,8 @@ class BadRequestException(Exception):
 
 class ForbiddenException(Exception):
     pass
+
+
+class BufferOverflowException(Exception):
+    pass
+

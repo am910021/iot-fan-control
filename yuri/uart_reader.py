@@ -31,7 +31,7 @@ class UartReader:
         if not buff or len(buff) < 2:
             return False
         stream = Stream(buff)
-        uart_id = stream.readShort()
+        uart_id = stream.read_short()
         if uart_id != UartReader._UART_ID:
             return False
         

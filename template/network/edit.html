@@ -1,0 +1,30 @@
+<!DOCTYPE html><html><head><meta charset="UTF-8">
+<title>{|page_title|}</title></head><body>
+<form method="POST" action="/api/network/edit">
+    <label>AP Active</label> <input type="checkbox" name="ap_enable" id="ap_enable" {|ap_c|} onchange="change('ap_enable', 'ap')"><br>
+    <div id="ap">
+    <label>AP SSID</label> <input type="text" name="ap_ssid" value="{|ap_ssid|}"><br>
+    <label>AP PWD</label> <input type="text" name="ap_passwd" value="{|ap_passwd|}"><br>
+    </div><br>
+
+    <label>Wi-Fi Active</label> <input type="checkbox" name="wifi_enable" id="wifi_enable" {|wifi_c|} onchange="change('wifi_enable', 'wifi')"><br>
+    <div id="wifi">
+    <label>Wi-Fi  SSID</label> <input type="text" name="wifi_ssid" value="{|wifi_ssid|}"><br>
+    <label>Wi-Fi  PWD</label> <input type="text" name="wifi_passwd" value="{|wifi_passwd|}"><br>
+    </div><br>
+    <input type="submit" value="Submit"><span>   </span><input type="reset" value="Reset">
+</form>
+<a href="/api/network/info2">Network Info</a>
+<script type="application/javascript">
+window.onload = function() {
+  change('ap_enable', 'ap');
+  change('wifi_enable', 'wifi');
+};
+function change(source, target){
+    let se = document.getElementById(source);
+    let te = document.getElementById(target);
+    te.style.visibility=se.checked ? 'visible' : 'hidden';
+}
+</script>
+
+</body></html>

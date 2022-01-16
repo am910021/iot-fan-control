@@ -114,6 +114,7 @@ class Processor:
     @staticmethod
     def parse_heading(line):
         ra = line.split()
+        print(ra)
         try:
             return {
                 'verb': ra[0].lower(),
@@ -194,7 +195,8 @@ class Processor:
         if 'body' in response:
             body = response['body']
             if body:
-                body(stream)
+                size = body(stream)
+                logger.debug('size:{}'.format(size))
 
     def unauthorized_error(self, client_socket):
         headers = {
@@ -232,11 +234,13 @@ class Processor:
 
     @staticmethod
     def stream_error(stream, error_message, e):
-        stream.write(error_message)
+        size = 0
+        size += stream.write(error_message)
         if e and Processor.DEBUG_MODE:
-            stream.write('<pre>')
-            stream.write(Processor.stacktrace(e))
-            stream.write('</pre>')
+            size += stream.write('<pre>')
+            size += stream.write(Processor.stacktrace(e))
+            size += stream.write('</pre>')
+        return size
 
     @staticmethod
     def stacktrace(e):
@@ -260,6 +264,8 @@ class Processor:
 
     @staticmethod
     def write_html(stream, data1, ef, data2):
-        stream.write(data1)
-        ef(stream)
-        stream.write(data2)
+        size = 0
+        size += stream.write(data1)
+        size += ef(stream)
+        size += stream.write(data2)
+        return size

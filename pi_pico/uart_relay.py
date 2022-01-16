@@ -23,7 +23,7 @@ def control():
         return
         
     stream = uart.getStream()
-    stream.printHex()
+    stream.print_hex()
         
 if __name__ == '__main__':
     for rel in rels:

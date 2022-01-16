@@ -84,17 +84,17 @@ def saveInfo(info):
         os.mkdir('/tmp')
 
     stream = Stream()
-    stream.writeStr(info['ap']['essid'])
-    stream.writeStr(info['ap']['password'])
-    stream.writeStr(info['ap']['ip'])
-    stream.writeStr(info['ap']['mac'])
-    stream.writeStr(info['wifi']['essid'])
-    stream.writeStr(info['wifi']['password'])
-    stream.writeStr(info['wifi']['ip'])
-    stream.writeStr(info['wifi']['mac'])
+    stream.write_str(info['ap']['essid'])
+    stream.write_str(info['ap']['password'])
+    stream.write_str(info['ap']['ip'])
+    stream.write_str(info['ap']['mac'])
+    stream.write_str(info['wifi']['essid'])
+    stream.write_str(info['wifi']['password'])
+    stream.write_str(info['wifi']['ip'])
+    stream.write_str(info['wifi']['mac'])
 
     with open('/tmp/interface.bin', 'wb') as f:
-        f.write(stream.getBytes())
+        f.write(stream.get_bytes())
 
 
 if __name__ == '__main__':

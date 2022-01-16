@@ -22,12 +22,12 @@ class UartTest:
         if stream.length() < 2:
             return
             
-        code = stream.readShort()
+        code = stream.read_short()
         if code != 1226:
             return
         
-        stream.printHex()
-        #ti = stream.readLong()
+        stream.print_hex()
+        #ti = stream.read_long()
         #print(ti)
         
 if __name__ == '__main__':

@@ -13,3 +13,6 @@ class Handler:
         print(api_request)
         gc.collect()
         return {"test":"pass"}
+
+    def get(self, api_request):
+        return b'<h1>Hello</h1>'

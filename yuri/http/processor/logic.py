@@ -2,16 +2,9 @@ import json
 from ..share import BadRequestException, NotFoundException, get_relative_path
 
 
-class ApiProcess:
+class LogicProcess:
     def __init__(self, handlers):
-        """
-        :param handlers:  an ordered list of pairs from [string()] -> APIHandler
-        """
         self._handlers = handlers
-
-    #
-    # callbacks
-    #
 
     def handle_request(self, http_request):
         relative_path = get_relative_path(http_request)
@@ -34,14 +27,15 @@ class ApiProcess:
                 'body': json_body,
                 'http': http_request
             }
+            code, content_type, response = 500, "text/html", None
             if verb == 'get':
-                response = handler.get(api_request)
+                code, content_type, response = handler.get(api_request)
             elif verb == 'put':
-                response = handler.put(api_request)
+                code, content_type, response = handler.put(api_request)
             elif verb == 'post':
-                response = handler.post(api_request)
+                code, content_type, response = handler.post(api_request)
             elif verb == 'delete':
-                response = handler.delete(api_request)
+                code, content_type, response = handler.delete(api_request)
             else:
                 # TODO add support for more verbs!
                 error_message = "Unsupported verb: {}".format(verb)
@@ -49,27 +43,15 @@ class ApiProcess:
         else:
             error_message = "No handler found for components {}".format(components)
             raise NotFoundException(error_message)
-        if response is not None:
-            if type(response) is dict:
-                data = json.dumps(response).encode('UTF-8')
-                content_type = "application/json"
-            elif type(response) is bytes:
-                data = response
-                content_type = "text/plain"
-            else:
-                raise Exception("Response from API Handler is neither dict nor bytearray nor None")
-            body = lambda stream: stream.write(data)
-        else:
-            data = body = None
+
         ret = {
-            'code': 200,
+            'code': code,
             'headers': {
-                #'content-length': len(data) if data else 0
+                # 'content-length': len(data) if data else 0
+                'content_type': content_type
             },
-            'body': body
+            'body': response
         }
-        if data is not None:
-            ret['headers']['content-type'] = content_type
         return ret
 
     #

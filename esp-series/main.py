@@ -16,6 +16,10 @@ gc.collect()
 import yhttpd
 print(gc.mem_free())
 
+if 'uos' in globals():
+    del globals()['uos']
+if 'bdev' in globals():
+    del globals()['bdev']
 if 'yhttpd' in globals():
     del globals()['yhttpd']
 if 'flashbdev' in sys.modules:

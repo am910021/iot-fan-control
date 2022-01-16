@@ -5,9 +5,9 @@ import time
 
 def sendLiveSingle():
     stream = Stream()
-    stream.writeShort(1226)
-    stream.writeByte(0)
-    UartWrite.get_instance().write(stream.getBytes())
+    stream.write_short(1226)
+    stream.write_byte(0)
+    UartWrite.get_instance().write(stream.get_bytes())
     
 tt = Timer(sendLiveSingle, 1000*1)
 while True:

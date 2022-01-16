@@ -24,8 +24,8 @@ class UartWrite:
     
     def write(self, b:bytes):
         stream = Stream()
-        stream.writeShort(UartWrite._UART_ID)
+        stream.write_short(UartWrite._UART_ID)
         stream.write(b)
-        self._uart.write(stream.getBytes())
+        self._uart.write(stream.get_bytes())
         
 uart = UartWrite.get_instance()

@@ -16,10 +16,10 @@ class UartTest:
     def run(self):
         now = time.time()
         stream = Stream()
-        stream.writeByte(20)
-        stream.writeLong(time.ticks_ms())
-        stream.printHex()
-        self.__uartObj.write(stream.getBytes())
+        stream.write_byte(20)
+        stream.write_long(time.ticks_ms())
+        stream.print_hex()
+        self.__uartObj.write(stream.get_bytes())
 
 
 

@@ -1,6 +1,4 @@
-# my_api.py
-import sys, machine
-import network, time
+from yuri.http.response import Json
 from yuri.stream import Stream
 import gc
 
@@ -9,23 +7,27 @@ class Handler:
         pass
     
     def get(self, api_request):
-        #print(api_request['http']['debug'])
-
         info = {}
         with open('/tmp/interface.bin', 'rb') as f:
             stream = Stream(f.read())
             info['ap'] = {}
-            if stream.readByte() == 1:
-                info['ap']['ssid'] = stream.readStr()
-                info['ap']['password'] = stream.readStr()
-                info['ap']['address'] = stream.readStr()
-                info['ap']['mac'] = stream.readStr()
+            if stream.read_bool():
+                info['ap']['ssid'] = stream.read_str()
+                info['ap']['password'] = stream.read_str()
+                info['ap']['address'] = stream.read_str()
+                info['ap']['mac'] = stream.read_str()
+            else:
+                stream.read_str()
+                stream.read_str()
 
             info['wifi'] = {}
-            if stream.readByte() == 1:
-                info['wifi']['ssid'] = stream.readStr()
-                info['wifi']['password'] = stream.readStr()
-                info['wifi']['address'] = stream.readStr()
-                info['wifi']['mac'] = stream.readStr()
+            if stream.read_bool():
+                info['wifi']['ssid'] = stream.read_str()
+                info['wifi']['password'] = stream.read_str()
+                info['wifi']['address'] = stream.read_str()
+                info['wifi']['mac'] = stream.read_str()
+            else:
+                stream.read_str()
+                stream.read_str()
         gc.collect()
-        return info
+        return Json.response(info)

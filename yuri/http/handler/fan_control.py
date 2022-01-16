@@ -21,7 +21,7 @@ class Handler:
         
         stream = Stream()
         for ctrl in ctrls:
-            stream.writeByte(int(ctrl))
-        uart.write(stream.getBytes())
+            stream.write_byte(int(ctrl))
+        uart.write(stream.get_bytes())
         gc.collect()
         return {'name': 'api-3'}
