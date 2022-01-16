@@ -15,7 +15,7 @@ class ApiProcess:
 
     def handle_request(self, http_request):
         relative_path = get_relative_path(http_request)
-        path_part, query_params = self.extract_query(relative_path)
+        path_part, url_params = self.extract_query(relative_path)
         components = path_part.strip('/').split('/')
         prefix, handler, context = self.find_handler(components)
         if handler:
@@ -30,7 +30,7 @@ class ApiProcess:
             api_request = {
                 'prefix': prefix,
                 'context': context,
-                'query_params': query_params,
+                'url_params': url_params,
                 'body': json_body,
                 'http': http_request
             }
@@ -93,12 +93,12 @@ class ApiProcess:
         path_part = components[0]
         query_part = components[1]
         qparam_components = query_part.split("&")
-        query_params = {}
+        url_params = {}
         for qparam_component in qparam_components:
             if qparam_component.strip() == '':
                 continue
             qparam = qparam_component.split("=")
             if len(qparam) != 2 or not qparam[0]:
                 raise BadRequestException("Invalid query parameter: {}".format(qparam_component))
-            query_params[qparam[0]] = qparam[1]
-        return path_part, query_params
+            url_params[qparam[0]] = qparam[1]
+        return path_part, url_params

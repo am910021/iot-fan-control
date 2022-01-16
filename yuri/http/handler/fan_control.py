@@ -8,7 +8,7 @@ class Handler:
         pass
     
     def get(self, api_request):
-        params = api_request['query_params']
+        params = api_request['url_params']
         #if not api_request['http']['debug']:
         #    return {'msg': 'debug mode can\'t control fan.'}
         

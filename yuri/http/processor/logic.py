@@ -8,23 +8,27 @@ class LogicProcess:
 
     def handle_request(self, http_request):
         relative_path = get_relative_path(http_request)
-        path_part, query_params = self.extract_query(relative_path)
+        path_part, url_params = self.extract_query(relative_path)
         components = path_part.strip('/').split('/')
         prefix, handler, context = self.find_handler(components)
         if handler:
-            json_body = None
+            body = None
             headers = http_request['headers']
-            if 'body' in http_request and 'content-type' in headers and headers['content-type'] == "application/json":
-                try:
-                    json_body = json.loads(http_request['body'])
-                except Exception as e:
-                    raise BadRequestException("Failed to load JSON: {}".format(e))
+            if 'body' in http_request and 'content-type' in headers:
+                if headers['content-type'] == "application/json":
+                    try:
+                        body = json.loads(http_request['body'])
+                    except Exception as e:
+                        raise BadRequestException("Failed to load JSON: {}".format(e))
+                elif headers['content-type'] == "application/x-www-form-urlencoded":
+                    a,body = self.extract_query('?'+http_request['body'].decode('utf8'))
+
             verb = http_request['verb']
             api_request = {
                 'prefix': prefix,
                 'context': context,
-                'query_params': query_params,
-                'body': json_body,
+                'url_params': url_params,
+                'body': body,
                 'http': http_request
             }
             code, content_type, response = 500, "text/html", None
@@ -75,12 +79,12 @@ class LogicProcess:
         path_part = components[0]
         query_part = components[1]
         qparam_components = query_part.split("&")
-        query_params = {}
+        url_params = {}
         for qparam_component in qparam_components:
             if qparam_component.strip() == '':
                 continue
             qparam = qparam_component.split("=")
             if len(qparam) != 2 or not qparam[0]:
                 raise BadRequestException("Invalid query parameter: {}".format(qparam_component))
-            query_params[qparam[0]] = qparam[1]
-        return path_part, query_params
+            url_params[qparam[0]] = qparam[1]
+        return path_part, url_params

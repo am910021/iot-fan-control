@@ -1,22 +1,10 @@
+import gc, sys
 
-def replace_template_params(line, params) -> str:
-    while True:
-        bri = line.find('|}')
-        if bri < 0:
-            return line
-        bli = line.find('{|', 0, bri)
-        if bli < 0:
-            return line
+del globals()['bdev']
+del sys.modules['flashbdev']
 
-        name = line[bli + 2:bri]
-        if name in params:
-            line = line.replace('{|' + name + '|}', params[name])
-            continue
+config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
 
-        
-line='asdzxczxc{|var1|}czxcasdasd{|var2|}asdasd'
-parm={'var1':'1111111111111111', 'var2':'2222222222222222'}
-
-print(replace_template_params(line, parm))
-
-
+print(str(globals()))
+print()
+print(str(sys.modules))

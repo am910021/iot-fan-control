@@ -30,6 +30,8 @@ class TCPServer:
             client_socket.close()
             self._client_socket = None
             return False
+        gc.collect()
+        logger.info('Memory allow:{}'.format(gc.mem_free()))
 
     def handle_accept(self, server_socket):
         client_socket, remote_addr = server_socket.accept()

@@ -9,7 +9,7 @@ class Handler:
     def get(self, api_request):
         #print('debug', api_request['http']['debug'])
         
-        params = api_request['query_params']
+        params = api_request['url_params']
         
         if params and 'exit' in params:
             #machine.soft_reset()

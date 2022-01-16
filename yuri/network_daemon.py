@@ -63,10 +63,10 @@ class NetworkHelper:
 
         # 如果沒有config.txt檔案，就寫入預設值進config裡
         if sys_onfig.default_is_loaded:
-            ssid = 'IOT-'+("".join(["%X" % (c) for c in ap.config('mac')[3:]]))
+            ssid = 'IOT-' + ("".join(["%X" % (c) for c in ap.config('mac')[3:]]))
 
             # 預設的ssid為'iot-<mac_address後三碼>' ex:iot-BE562A
-            sys_onfig.ap['ssid']=ssid
+            sys_onfig.ap['ssid'] = ssid
             # 預設的ssid密碼為'iot-<mac_address後三碼>'的倒置 ex:A265EB-toi
             sys_onfig.ap['password'] = "".join(ssid[i - 1] for i in range(len(ssid), 0, -1))
 
@@ -82,7 +82,7 @@ class NetworkHelper:
             ap.active(True)
 
         ap.active(True)  # 啟動網路
-        ap.config(essid=sys_onfig.ap['ssid'], password=sys_onfig.ap['password']) # 設定ssid, password
+        ap.config(essid=sys_onfig.ap['ssid'], password=sys_onfig.ap['password'])  # 設定ssid, password
         ap.config(authmode=3)  # 設定驗證模式
         mac_bytes = ap.config('mac')
         mac = (":".join(["%X" % (c) for c in mac_bytes]))
@@ -107,24 +107,27 @@ class NetworkHelper:
         if 'tmp' not in folders:
             os.mkdir('/tmp')
 
+        enable = 'enable'
+        ssid = 'ssid'
+        pwd = 'password'
         stream = Stream()
-        stream.write_bool(sys_onfig.ap['enable'])
-        if not sys_onfig.ap['enable']:
-            stream.write_str(sys_onfig.ap['ssid'])
-            stream.write_str(sys_onfig.ap['password'])
+        stream.write_bool(sys_onfig.ap[enable])
+        if not sys_onfig.ap[enable]:
+            stream.write_str(sys_onfig.ap[ssid])
+            stream.write_str(sys_onfig.ap[pwd])
         else:
-            stream.write_str(self.info['ap']['ssid'])
-            stream.write_str(self.info['ap']['password'])
+            stream.write_str(self.info['ap'][ssid])
+            stream.write_str(self.info['ap'][pwd])
             stream.write_str(self.info['ap']['ip'])
             stream.write_str(self.info['ap']['mac'])
 
-        stream.write_bool(sys_onfig.wifi['enable'])
-        if not sys_onfig.wifi['enable']:
-            stream.write_str(sys_onfig.wifi['ssid'])
-            stream.write_str(sys_onfig.wifi['password'])
+        stream.write_bool(sys_onfig.wifi[enable])
+        if not sys_onfig.wifi[enable]:
+            stream.write_str(sys_onfig.wifi[ssid])
+            stream.write_str(sys_onfig.wifi[pwd])
         else:
-            stream.write_str(self.info['wifi']['ssid'])
-            stream.write_str(self.info['wifi']['password'])
+            stream.write_str(self.info['wifi'][ssid])
+            stream.write_str(self.info['wifi'][pwd])
             stream.write_str(self.info['wifi']['ip'])
             stream.write_str(self.info['wifi']['mac'])
 

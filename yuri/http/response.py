@@ -7,8 +7,7 @@ class Html:
     @staticmethod
     def response(template_name, params={}, status=200):
         gc.collect()
-        f = open('/template/' + template_name, 'r')
-        return status, 'text/html', (lambda stream: Html.stream_file(stream, f, params))
+        return status, 'text/html', (lambda stream: Html.stream_file(stream, template_name, params))
 
     @staticmethod
     def replace_template_params(line: str, params: dict) -> str:
@@ -20,7 +19,7 @@ class Html:
             if bli < 0:
                 return line
             name = line[bli + 2:bri]
-            if name in params:
+            if params and name in params:
                 line = line.replace('{|' + name + '|}', str(params[name]))
                 continue
             else:
@@ -29,22 +28,20 @@ class Html:
 
 
     @staticmethod
-    def stream_file(stream, f, params: dict):
+    def stream_file(stream, file, params: dict):
         _BUFF_SIZE = 1024
-        while True:
-            line = f.readline(_BUFF_SIZE + 1)
-            if len(line) > _BUFF_SIZE:
-                raise BufferOverflowException('The read file buffer exceeds {}.'.format(_BUFF_SIZE))
-            if '|}' in line and params:
-                line = Html.replace_template_params(line, params)
+        with open('/template/' + file, 'r') as f:
+            while True:
+                line = f.readline(_BUFF_SIZE + 1)
+                if len(line) > _BUFF_SIZE:
+                    raise BufferOverflowException('The read file buffer exceeds {}.'.format(_BUFF_SIZE))
+                if '|}' in line:
+                    line = Html.replace_template_params(line, params)
 
-            if line:
-                stream.write(line)
-            else:
-                break
-
-        f.close()
-
+                if line:
+                    stream.write(line)
+                else:
+                    break
 
 class Json:
 

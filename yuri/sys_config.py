@@ -40,7 +40,7 @@ class Config:
         self.http['realm'] = "esp"
         self.http['user'] = "admin"
         self.http['password'] = ""
-        self.http['max_headers'] = 10
+        self.http['max_headers'] = 15
         self.http['max_content_length'] = 1024
 
         self.ap['enable'] = True
