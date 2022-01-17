@@ -3,7 +3,7 @@ from yuri.logger import logger
 from yuri.network_daemon import NetworkHelper
 
 #設定logger 等級0=debug 1=info 2=warring 3=error
-logger.setLevels([1])
+logger.set_levels([1])
 
 #enable network ap / wifi.
 network = NetworkHelper()

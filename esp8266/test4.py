@@ -98,7 +98,7 @@ def saveInfo(info):
 
 
 if __name__ == '__main__':
-    logger.setLevels([0, 1, 2, 3])
+    logger.set_levels([0, 1, 2, 3])
     ap_info = create_ap('esp8266', '0123456789')
     wifi_info = do_connect('Poo_2.4G', '99999990')
     saveInfo({'ap': ap_info, 'wifi': wifi_info})

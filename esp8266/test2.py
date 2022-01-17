@@ -143,7 +143,7 @@ if __name__ == '__main__':
         'use_ssl': False,
         'dev': True
     }
-    logger.setLevels([1, 3])
+    logger.set_levels([1, 3])
     ap_info = createAP('esp8266', '0123456789')
     gc.collect()
     wifi_info = doConnect('Poo_2.4G', '99999990')

@@ -1,12 +1,10 @@
-
-
 class Logger:
     _instance = None
-    
-    DEBUG       = 0
-    INFO        = 1
-    WARNING     = 2
-    ERROR       = 3
+
+    DEBUG = 0
+    INFO = 1
+    WARNING = 2
+    ERROR = 3
 
     @staticmethod
     def get_instance():
@@ -16,37 +14,34 @@ class Logger:
 
     def __init__(self):
         if Logger._instance is not None:
-            pass
-            #raise Exception('only one instance can exist')
-        else:
-            self._id = id(self)
-            Logger._instance = self
-            self._levels = [Logger.INFO]
-    
+            raise Exception('only one instance can exist')
+
+        self._id = id(self)
+        Logger._instance = self
+        self._levels = [Logger.ERROR]
+
     def get_id(self):
         return self._id
-    
-    def setLevels(self, levels:list):
+
+    def set_levels(self, levels: list):
         self._levels = levels
-    
-    def debug(self,message, *args, **kwargs):
-        if not Logger.DEBUG in self._levels:
+
+    def debug(self, message, *args, **kwargs):
+        self.print(Logger.DEBUG, '[Debug] ' + message.format(*args, **kwargs))
+
+    def info(self, message, *args, **kwargs):
+        self.print(Logger.INFO, '[Info] ' + message.format(*args, **kwargs))
+
+    def warning(self, message, *args, **kwargs):
+        self.print(Logger.WARNING, '[Warning] ' + message.format(*args, **kwargs))
+
+    def error(self, message, *args, **kwargs):
+        self.print(Logger.ERROR, '[Error] ' + message.format(*args, **kwargs))
+
+    def print(self, Level, msg):
+        if not Level in self._levels:
             return
-        print('[Debug] '+message.format(*args, **kwargs))
-    
-    def info(self,message, *args, **kwargs):
-        if not Logger.INFO in self._levels:
-            return
-        print('[Info] '+message.format(*args, **kwargs))
-        
-    def warning(self,message, *args, **kwargs):
-        if not Logger.WARNING in self._levels:
-            return
-        print('[Warning] '+message.format(*args, **kwargs))
-    
-    def error(self,message, *args, **kwargs):
-        if not Logger.ERROR in self._levels:
-            return
-        print('[Error] '+message.format(*args, **kwargs))
-        
+        print(msg)
+
+
 logger = Logger.get_instance()

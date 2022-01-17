@@ -71,7 +71,7 @@ def sendLiveSingle():
     uart.write(stream.get_bytes())
 
 if __name__ == '__main__':
-    logger.setLevels([0,1,2,3])
+    logger.set_levels([0, 1, 2, 3])
     #enable network ap / wifi.
     network = NetworkHelper()
     network.do_connect()

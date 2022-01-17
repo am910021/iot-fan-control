@@ -3,7 +3,7 @@ import sys
 from yuri.logger import logger
 from ..share import *
 
-logger.setLevels([0, 1, 2, 3])
+logger.set_levels([0, 1, 2, 3])
 
 
 class Processor:

@@ -14,31 +14,16 @@ class TCPServer:
         self._server_socket = None
         self._processor = processor
 
-    def handle_receive(self, client_socket, tcp_request):
-        gc.collect()
-        try:
-            done, response = self._processor.handle_request(client_socket, tcp_request)
-            if response and len(response) > 0:
-                client_socket.write(response)
-            if done:
-                client_socket.close()
-                return False
-            else:
-                self._client_socket = client_socket
-                return True
-        except:
-            client_socket.close()
-            self._client_socket = None
-            return False
-        gc.collect()
-        logger.info('Memory allow:{}'.format(gc.mem_free()))
-
     def handle_accept(self, server_socket):
-        client_socket, remote_addr = server_socket.accept()
+        gc.collect()
+        client_socket, remote = server_socket.accept()
         client_socket.settimeout(self._timeout)
-        tcp_request = {'remote': remote_addr}
-        while self.handle_receive(client_socket, tcp_request):
+        try:
+            done, response = self._processor.handle_request(client_socket, {'remote': remote})
+        except:
             pass
+        finally:
+            client_socket.closr()
 
     def start(self):
         micropython.alloc_emergency_exception_buf(100)

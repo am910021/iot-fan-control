@@ -11,7 +11,7 @@ from yuri.http.processor.file import FileProcess
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
-logger.setLevels([0, 1, 2, 3])
+logger.set_levels([0, 1, 2, 3])
 
 config = dict(sys_config.http)
 del globals()['sys_config']
