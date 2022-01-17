@@ -18,12 +18,12 @@ class TCPServer:
         gc.collect()
         client_socket, remote = server_socket.accept()
         client_socket.settimeout(self._timeout)
-        try:
-            done, response = self._processor.handle_request(client_socket, {'remote': remote})
-        except:
-            pass
-        finally:
-            client_socket.closr()
+        #try:
+        done, response = self._processor.handle_request(client_socket, {'remote': remote})
+        #except:
+        #    pass
+        #finally:
+        client_socket.close()
 
     def start(self):
         micropython.alloc_emergency_exception_buf(100)

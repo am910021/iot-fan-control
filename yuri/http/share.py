@@ -3,9 +3,7 @@ SERVER_NAME = "Yuri's_Http_Server(yHttpd)"
 
 
 def get_relative_path(http_request):
-    path = http_request['path']
-    prefix = http_request['prefix']
-    return path[len(prefix):]
+    return http_request['path'][len(http_request['prefix']):]
 
 
 def dict_update(a: dict, b: dict):

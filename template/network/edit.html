@@ -1,7 +1,7 @@
 <!DOCTYPE html><html><head><meta charset="UTF-8">
 <title>{|page_title|}</title></head><body>
 <h3 style="color: red;">{|error|}</h3><h3 style="color: green;">{|success|}</h3>
-<form method="POST" action="/api/network/edit2">
+<form method="POST" action="/network/edit">
     <label>AP Active</label> <input type="checkbox" name="ae" {|ae|}><br>
     <label>AP SSID</label> <input type="text" name="as" value="{|as|}"><br>
     <label>AP PWD</label> <input type="text" name="ap" value="{|ap|}"><br><br>
@@ -10,5 +10,5 @@
     <label>Wi-Fi  PWD</label> <input type="text" name="wp" value="{|wp|}"><br><br>
     <input type="submit" value="Submit"><span>   </span><input type="reset" value="Reset"><br>
 </form><br>
-<a href="/api/network/info2">Network Info</a>
+<a href="/network/info">Network Info</a>
 </body></html>

@@ -55,11 +55,15 @@ class Handler:
         info = {}
         info['page_title'] = 'Network edit'
         config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
-        info['ae'] = 'checked' if config.ap['enable'] else ''
-        info['as'] = config.ap['ssid']
-        info['ap'] = config.ap['password']
-        info['we'] = 'checked' if config.wifi['enable'] else ''
-        info['ws'] = config.wifi['ssid']
-        info['wp'] = config.wifi['password']
+        ap, wifi = dict(config.ap), dict(config.wifi)
+        config = None
         del sys.modules['yuri.sys_config']
+        gc.collect()
+        info['ae'] = 'checked' if ap['enable'] else ''
+        info['as'] = ap['ssid']
+        info['ap'] = ap['password']
+        info['we'] = 'checked' if wifi['enable'] else ''
+        info['ws'] = wifi['ssid']
+        info['wp'] = wifi['password']
+
         return info

@@ -10,7 +10,7 @@ CONTENT_TYPE_MAP = {
 
 
 class FileProcess:
-    def __init__(self, root_path='/www', block_size=1024):
+    def __init__(self, root_path='/www', block_size=256):
         if not self.exists(root_path) or not self.is_dir(root_path):
             msg = "Root path {} is not an existing directory".format(root_path)
             raise Exception(msg)
@@ -39,15 +39,13 @@ class FileProcess:
         #
         remote = http_request['remote']
         if not self.is_prefix(self._root_path, absolute_path):
-            logger.info(
-                "FORBIDDEN {} {}".format(remote, absolute_path))
+            logger.info("FORBIDDEN {} {}".format(remote, absolute_path))
             raise ForbiddenException(absolute_path)
         #
         # If the path doesn't exist, 404 out
         #
         if not self.exists(absolute_path):
-            logger.info(
-                "NOT_FOUND {} {}".format(remote, absolute_path))
+            logger.info("NOT_FOUND {} {}".format(remote, absolute_path))
             raise NotFoundException(absolute_path)
         #
         # Otherwise, generate a file listing or a file
@@ -55,9 +53,8 @@ class FileProcess:
         if self.is_dir(absolute_path):
             index_path = absolute_path + "/index.html"
             if self.exists(index_path):
-                response = self.create_file_response(index_path)
                 logger.info("ACCESS {} {}".format(remote, index_path))
-                return response
+                return self.create_file_response(index_path)
             else:
                 logger.info("ACCESS {} {}".format(remote, absolute_path))
                 prefix = http_request['prefix']
@@ -81,9 +78,7 @@ class FileProcess:
 
     def generate_file(self, path):
         gc.collect()
-        f = open(path, 'r')
-        serializer = lambda stream: self.stream_file(stream, f)
-        return self.file_size(path), serializer
+        return self.file_size(path), (lambda stream: self.stream_file(stream, path))
 
     def create_buffer(self):
         size = self._block_size
@@ -95,16 +90,16 @@ class FileProcess:
             except MemoryError:
                 size //= 2
 
-    def stream_file(self, stream, f):
+    def stream_file(self, stream, file):
+        f = open(file, 'r')
         buf = self.create_buffer()
-        size = 0
         while True:
             n = f.readinto(buf)
             if n:
-                size += stream.write(buf[:n])
+                stream.write(buf[:n])
             else:
                 break
-        return size
+        f.close()
 
     def effective_path(self, path):
         full_path = "{}/{}".format(self._root_path, path).rstrip('/')
@@ -141,8 +136,7 @@ class FileProcess:
     def create_message_response(code, message):
         data = "<html><body>{}</body></html>".format(message).encode('UTF-8')
         length = len(data)
-        body = lambda stream: FileProcess.stream_write(stream, data)
-        return FileProcess.create_response(code, "text/html", length, body)
+        return FileProcess.create_response(code, "text/html", length, (lambda stream: FileProcess.stream_write(stream, data)))
 
     def create_dir_listing_response(self, absolute_path):
         length, body = self.generate_dir_listing(absolute_path)
@@ -164,8 +158,7 @@ class FileProcess:
             data += "<li><a href=\"{}\">{}</a></li>\n".format(self.to_path(tmp), f)
         data += "</ul></body></html>"
         data = data.encode('UTF-8')
-        body = lambda stream: FileProcess.stream_write(stream, data)
-        return len(data), body
+        return len(data), (lambda stream: FileProcess.stream_write(stream, data))
 
     def to_path(self, components):
         return "/{}".format("/".join(components))

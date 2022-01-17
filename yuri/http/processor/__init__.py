@@ -101,33 +101,26 @@ class Processor:
             return self.response(client_socket, response)
         except BadRequestException as e:
             sys.print_exception(e)
-            return Processor.bad_request_error(client_socket, e)
+            return Processor.error(client_socket, 400, "Bad Request: {}".format(e), e)
         except ForbiddenException as e:
-            return Processor.forbidden_error(client_socket, e)
+            return Processor.error(client_socket, 403, "Forbidden: {}".format(e), e)
         except NotFoundException as e:
-            return Processor.not_found_error(client_socket, e)
+            return Processor.error(client_socket, 404, "Not Found: {}".format(e), e)
         except BaseException as e:
-            return Processor.internal_server_error(client_socket, e)
+            return Processor.error(client_socket, 500, "Internal Server Error: {}".format(e), e)
         finally:
             gc.collect()
 
     @staticmethod
     def parse_heading(line):
         ra = line.split()
-        print(ra)
-        try:
-            return {
-                'verb': ra[0].lower(),
-                'path': ra[1],
-                'protocol': ra[2]
-            }
-        except IndexError as e:
-            raise BadRequestException("IndexError: {}".format(e))
+        if len(ra) < 3:
+            raise BadRequestException("IndexError")
+        return {'verb': ra[0].lower(), 'path': ra[1], 'protocol': ra[2]}
 
     @staticmethod
     def parse_header(line):
-        ra = line.split(":")
-        return ra[0].strip(), ra[1].strip()
+        return line.split(":")[:2]
 
     def is_authorized(self, authorization):
         import ubinascii
@@ -135,13 +128,11 @@ class Processor:
             tmp = authorization.split()
             if tmp[0].lower() == "basic":
                 ra = ubinascii.a2b_base64(tmp[1].strip().encode()).decode().split(':')
-                return ra[0] == self._config['user'] and ra[1] == self._config[
-                    'password']
+                return ra[0] == self._config['user'] and ra[1] == self._config['password']
             else:
-                raise BadRequestException(
-                    "Unsupported authorization method: {}".format(tmp[0]))
-        except Exception as e:
-            raise BadRequestException("authorization faild: {}".format(e))
+                raise BadRequestException("Unsupported authorization method.")
+        except:
+            raise BadRequestException("authorization failed.")
 
     @staticmethod
     def server_name():
@@ -195,52 +186,25 @@ class Processor:
         if 'body' in response:
             body = response['body']
             if body:
-                size = body(stream)
-                logger.debug('size:{}'.format(size))
+                body(stream)
 
     def unauthorized_error(self, client_socket):
-        headers = {
-            'www-authenticate': "Basic realm={}".format(self._config['realm'])
-        }
-        return Processor.error(client_socket, 401, "Unauthorized", None, headers)
-
-    @staticmethod
-    def bad_request_error(client_socket, e):
-        error_message = "Bad Request: {}".format(e)
-        return Processor.error(client_socket, 400, error_message, e)
-
-    @staticmethod
-    def forbidden_error(client_socket, e):
-        error_message = "Forbidden: {}".format(e)
-        return Processor.error(client_socket, 403, error_message, e)
-
-    @staticmethod
-    def not_found_error(client_socket, e):
-        error_message = "Not Found: {}".format(e)
-        return Processor.error(client_socket, 404, error_message, e)
-
-    @staticmethod
-    def internal_server_error(client_socket, e):
-        # sys.print_exception(e)
-        logger.error(Processor.stacktrace(e).decode())
-        error_message = "Internal Server Error: {}".format(e)
-        return Processor.error(client_socket, 500, error_message, e)
+        return Processor.error(client_socket, 401, "Unauthorized", None, {'www-authenticate': "Basic realm={}".format(self._config['realm'])})
 
     @staticmethod
     def error(client_socket, code, error_message, e, headers={}):
-        ef = lambda stream: Processor.stream_error(stream, error_message, e)
-        response = Processor.generate_error_response(code, ef, headers)
+        response = Processor.generate_error_response(code,
+                                                     lambda stream: Processor.stream_error(stream, error_message, e),
+                                                     headers)
         return Processor.response(client_socket, response)
 
     @staticmethod
     def stream_error(stream, error_message, e):
-        size = 0
-        size += stream.write(error_message)
+        stream.write(error_message)
         if e and Processor.DEBUG_MODE:
-            size += stream.write('<pre>')
-            size += stream.write(Processor.stacktrace(e))
-            size += stream.write('</pre>')
-        return size
+            stream.write('<pre>')
+            stream.write(Processor.stacktrace(e))
+            stream.write('</pre>')
 
     @staticmethod
     def stacktrace(e):
@@ -251,21 +215,19 @@ class Processor:
 
     @staticmethod
     def generate_error_response(code, ef, headers={}):
-        data1 = '<html><body><header>{}/{}<hr></header>'.format(SERVER_NAME, VERSION).encode('UTF-8')
-        # message data in ef will go here
-        data2 = '</body></html>'.encode('UTF-8')
         return {
             'code': code,
             'headers': dict_update({
                 'content-type': "text/html",
             }, headers),
-            'body': lambda stream: Processor.write_html(stream, data1, ef, data2)
+            'body': lambda stream: Processor.write_html(stream,
+                                                        '<html><body><header>{}/{}<hr></header>'.format(SERVER_NAME, VERSION).encode('UTF-8'),
+                                                        ef,
+                                                        '</body></html>'.encode('UTF-8'))
         }
 
     @staticmethod
     def write_html(stream, data1, ef, data2):
-        size = 0
-        size += stream.write(data1)
-        size += ef(stream)
-        size += stream.write(data2)
-        return size
+        stream.write(data1)
+        ef(stream)
+        stream.write(data2)
