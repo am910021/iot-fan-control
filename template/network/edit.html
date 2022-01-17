@@ -2,12 +2,12 @@
 <title>{|page_title|}</title></head><body>
 <h3 style="color: red;">{|error|}</h3><h3 style="color: green;">{|success|}</h3>
 <form method="POST" action="/api/network/edit2">
-    <label>AP Active</label> <input type="checkbox" name="ap_enable" {|ap_enable|}><br>
-    <label>AP SSID</label> <input type="text" name="ap_ssid" value="{|ap_ssid|}"><br>
-    <label>AP PWD</label> <input type="text" name="ap_passwd" value="{|ap_passwd|}"><br><br>
-    <label>Wi-Fi Active</label> <input type="checkbox" name="wifi_enable" {|wifi_enable|}><br>
-    <label>Wi-Fi  SSID</label> <input type="text" name="wifi_ssid" value="{|wifi_ssid|}"><br>
-    <label>Wi-Fi  PWD</label> <input type="text" name="wifi_passwd" value="{|wifi_passwd|}"><br><br>
+    <label>AP Active</label> <input type="checkbox" name="ae" {|ae|}><br>
+    <label>AP SSID</label> <input type="text" name="as" value="{|as|}"><br>
+    <label>AP PWD</label> <input type="text" name="ap" value="{|ap|}"><br><br>
+    <label>Wi-Fi Active</label> <input type="checkbox" name="we" {|we|}><br>
+    <label>Wi-Fi  SSID</label> <input type="text" name="ws" value="{|ws|}"><br>
+    <label>Wi-Fi  PWD</label> <input type="text" name="wp" value="{|wp|}"><br><br>
     <input type="submit" value="Submit"><span>   </span><input type="reset" value="Reset"><br>
 </form><br>
 <a href="/api/network/info2">Network Info</a>

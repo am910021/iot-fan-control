@@ -4,10 +4,10 @@ from yuri.sys_config import config as sys_config
 from yuri.http.tcpserver import TCPServer
 #from yuri.http.processor.api import ApiProcess
 from yuri.http.processor.file import FileProcess
-from yuri.http.processor.logic import LogicProcess
+#from yuri.http.processor.logic import LogicProcess
 #from yuri.http.handler import my_api, my_api2, api3, fan_control, network_edit, network_info
-from yuri.http.handler import network_info2
-from yuri.http.handler import network_edit2
+#from yuri.http.handler import network_info2
+#from yuri.http.handler import network_edit2
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
@@ -26,13 +26,13 @@ del sys.modules['yuri.sys_config']
 #     (['fan'], fan_control.Handler())
 # ])
 
-api2_handler = LogicProcess([
-    (['network', 'info2'], network_info2.Handler()),
-    (['network', 'edit2'], network_edit2.Handler()),
-])
+#api2_handler = LogicProcess([
+#    (['network', 'info2'], network_info2.Handler()),
+#    (['network', 'edit2'], network_edit2.Handler()),
+#])
 
 processor = Processor(handlers=[
-    ('/api', api2_handler),
+    #('/api', api2_handler),
     #('/api', api_handler),
     ('/', FileProcess('/www'))
 ], config=config)

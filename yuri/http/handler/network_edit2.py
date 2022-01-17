@@ -15,25 +15,25 @@ class Handler:
         params = request['body']
         config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
 
-        config.ap['enable'] = True if 'ap_enable' in params else False
-        if params['ap_ssid'] != '':
-            config.ap['ssid'] = params['ap_ssid']
+        config.ap['enable'] = True if 'ae' in params else False
+        if params['as'] != '':
+            config.ap['ssid'] = params['as']
         else:
             return Handler.error_response('AP SSID is empty')
 
-        if params['ap_passwd'] != '':
-            config.ap['password'] = params['ap_passwd']
+        if params['ap'] != '':
+            config.ap['password'] = params['ap']
         else:
             return Handler.error_response('AP PWD is empty')
 
-        config.wifi['enable'] = True if 'wifi_enable' in params else False
-        if params['wifi_ssid'] != '':
-            config.wifi['ssid'] = params['wifi_ssid']
+        config.wifi['enable'] = True if 'we' in params else False
+        if params['ws'] != '':
+            config.wifi['ssid'] = params['ws']
         else:
             return Handler.error_response('WIFI SSID is empty')
 
-        if params['wifi_passwd'] != '':
-            config.wifi['password'] = params['wifi_passwd']
+        if params['wp'] != '':
+            config.wifi['password'] = params['wp']
         else:
             return Handler.error_response('WIFI PWD')
 
@@ -55,11 +55,11 @@ class Handler:
         info = {}
         info['page_title'] = 'Network edit'
         config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
-        info['ap_enable'] = 'checked' if config.ap['enable'] else ''
-        info['ap_ssid'] = config.ap['ssid']
-        info['ap_passwd'] = config.ap['password']
-        info['wifi_enable'] = 'checked' if config.wifi['enable'] else ''
-        info['wifi_ssid'] = config.wifi['ssid']
-        info['wifi_passwd'] = config.wifi['password']
+        info['ae'] = 'checked' if config.ap['enable'] else ''
+        info['as'] = config.ap['ssid']
+        info['ap'] = config.ap['password']
+        info['we'] = 'checked' if config.wifi['enable'] else ''
+        info['ws'] = config.wifi['ssid']
+        info['wp'] = config.wifi['password']
         del sys.modules['yuri.sys_config']
         return info

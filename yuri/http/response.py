@@ -29,9 +29,11 @@ class Html:
 
     @staticmethod
     def stream_file(stream, file, params: dict):
+        print(gc.mem_free())
         _BUFF_SIZE = 1024
         with open('/template/' + file, 'r') as f:
             while True:
+                print(gc.mem_free())
                 line = f.readline(_BUFF_SIZE + 1)
                 if len(line) > _BUFF_SIZE:
                     raise BufferOverflowException('The read file buffer exceeds {}.'.format(_BUFF_SIZE))
