@@ -97,8 +97,7 @@ class Processor:
             #
             # 一切正常，執行最後的handle_request
             #
-            response = handler.handle_request(http_request)
-            return self.response(client_socket, response)
+            return self.response(client_socket, handler.handle_request(http_request))
         except BadRequestException as e:
             sys.print_exception(e)
             return Processor.error(client_socket, 400, "Bad Request: {}".format(e), e)
@@ -106,7 +105,10 @@ class Processor:
             return Processor.error(client_socket, 403, "Forbidden: {}".format(e), e)
         except NotFoundException as e:
             return Processor.error(client_socket, 404, "Not Found: {}".format(e), e)
+        except BufferOverflowException as e:
+            return Processor.error(client_socket, 503, "Service Unavailable: {}".format(e), e)
         except BaseException as e:
+            sys.print_exception(e)
             return Processor.error(client_socket, 500, "Internal Server Error: {}".format(e), e)
         finally:
             gc.collect()
@@ -120,7 +122,8 @@ class Processor:
 
     @staticmethod
     def parse_header(line):
-        return line.split(":")[:2]
+        index = line.find(": ")
+        return line[:index], line[index+2:-2]
 
     def is_authorized(self, authorization):
         import ubinascii
@@ -154,6 +157,8 @@ class Processor:
             return "Forbidden"
         elif code == 404:
             return "Not Found"
+        elif code == 503:
+            return "Service Unavailable"
         elif code == 500:
             return "Internal Server Error"
         else:

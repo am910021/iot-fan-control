@@ -1,5 +1,5 @@
 from machine import UART, Pin
-from yuri.stream import Stream
+from yuri.stream_lite import Stream
 class UartWrite:
     _instance = None
     _UART_ID = 8204
@@ -24,7 +24,7 @@ class UartWrite:
     
     def write(self, b:bytes):
         stream = Stream()
-        stream.write_short(UartWrite._UART_ID)
+        stream.write_int(UartWrite._UART_ID)
         stream.write(b)
         self._uart.write(stream.get_bytes())
         

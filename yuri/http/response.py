@@ -1,5 +1,5 @@
 import gc, json
-from .share import BufferOverflowException
+from .share import BufferOverflowException, BUFFER_SIZE
 
 
 class Html:
@@ -12,8 +12,6 @@ class Html:
     @staticmethod
     def replace_template_params(line: str, params: dict) -> str:
         while True:
-            gc.collect()
-            print(gc.mem_free())
             bri = line.find('|}')
             if bri < 0:
                 return line
@@ -28,17 +26,15 @@ class Html:
                 line = line.replace('{|' + name + '|}', '')
                 continue
 
-
     @staticmethod
     def stream_file(stream, file, params: dict):
-        print(gc.mem_free())
-        _BUFF_SIZE = 256
         with open('/template/' + file, 'r') as f:
             while True:
+                gc.collect()
                 print(gc.mem_free())
-                line = f.readline(_BUFF_SIZE + 1)
-                if len(line) > _BUFF_SIZE:
-                    raise BufferOverflowException('The read file buffer exceeds {}.'.format(_BUFF_SIZE))
+                line = f.readline(BUFFER_SIZE + 1)
+                if len(line) > BUFFER_SIZE:
+                    raise BufferOverflowException('The read file buffer exceeds {}.'.format(BUFFER_SIZE))
                 if '|}' in line:
                     line = Html.replace_template_params(line, params)
 
@@ -46,6 +42,7 @@ class Html:
                     stream.write(line)
                 else:
                     break
+
 
 class Json:
 

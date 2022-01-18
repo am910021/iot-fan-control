@@ -1,5 +1,6 @@
 VERSION = '0.1_Alpha'
 SERVER_NAME = "Yuri's_Http_Server(yHttpd)"
+BUFFER_SIZE = 256
 
 
 def get_relative_path(http_request):
@@ -29,4 +30,3 @@ class ForbiddenException(Exception):
 
 class BufferOverflowException(Exception):
     pass
-

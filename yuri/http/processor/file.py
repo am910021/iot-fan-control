@@ -1,6 +1,6 @@
 import os, gc
 from yuri.logger import logger
-from ..share import *
+from yuri.http.share import *
 
 CONTENT_TYPE_MAP = {
     ".html": "text/html",
@@ -15,7 +15,7 @@ class FileProcess:
             msg = "Root path {} is not an existing directory".format(root_path)
             raise Exception(msg)
         self._root_path = root_path
-        self._block_size = block_size
+        self._block_size = BUFFER_SIZE
 
     #
     # callbacks
@@ -81,14 +81,14 @@ class FileProcess:
         return self.file_size(path), (lambda stream: self.stream_file(stream, path))
 
     def create_buffer(self):
-        size = self._block_size
+        _block_size = self._block_size
         while True:
-            if size < 1:
+            if _block_size < 1:
                 raise Exception("Unable to allocate buffer")
             try:
-                return bytearray(size)
+                return bytearray(_block_size)
             except MemoryError:
-                size //= 2
+                _block_size //= 2
 
     def stream_file(self, stream, file):
         f = open(file, 'r')

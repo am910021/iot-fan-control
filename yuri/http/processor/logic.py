@@ -1,5 +1,6 @@
 import json
 from ..share import BadRequestException, NotFoundException, get_relative_path
+from yuri.logger import logger
 
 
 class LogicProcess:
@@ -16,12 +17,16 @@ class LogicProcess:
             headers = http_request['headers']
             if 'body' in http_request and 'content-type' in headers:
                 if headers['content-type'] == "application/json":
+                    print("is application/json")
                     try:
                         body = json.loads(http_request['body'])
                     except Exception as e:
                         raise BadRequestException("Failed to load JSON: {}".format(e))
                 elif headers['content-type'] == "application/x-www-form-urlencoded":
+                    print("is application/x-www-form-urlencoded")
                     a,body = self.extract_query('?'+http_request['body'].decode('utf8'))
+                else:
+                    print("not anything")
 
             verb = http_request['verb']
             api_request = {
@@ -32,6 +37,7 @@ class LogicProcess:
                 'http': http_request
             }
             code, content_type, response = 500, "text/html", None
+            logger.info("ACCESS {} {}".format(http_request['remote'], http_request['path']))
             if verb == 'get':
                 code, content_type, response = handler.get(api_request)
             elif verb == 'put':

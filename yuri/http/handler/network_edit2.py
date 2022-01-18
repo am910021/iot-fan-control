@@ -1,8 +1,7 @@
 # my_api.py
-import sys
-
+import sys,json
 from yuri.http.response import Html
-from ..share import dict_update
+from yuri.http.share import dict_update
 import gc
 
 
@@ -14,7 +13,6 @@ class Handler:
         gc.collect()
         params = request['body']
         config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
-
         config.ap['enable'] = True if 'ae' in params else False
         if params['as'] != '':
             config.ap['ssid'] = params['as']

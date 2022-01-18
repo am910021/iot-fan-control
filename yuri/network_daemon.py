@@ -1,7 +1,7 @@
 import sys, os, time, network
 from .sys_config import config as sys_onfig
 from yuri.logger import logger
-from yuri.stream import Stream
+from yuri.stream_lite import Stream
 
 
 class NetworkHelper:
@@ -111,7 +111,7 @@ class NetworkHelper:
         ssid = 'ssid'
         pwd = 'password'
         stream = Stream()
-        stream.write_bool(sys_onfig.ap[enable])
+        stream.write_byte(1 if sys_onfig.ap[enable] else 0)
         if not sys_onfig.ap[enable]:
             stream.write_str(sys_onfig.ap[ssid])
             stream.write_str(sys_onfig.ap[pwd])
@@ -121,7 +121,7 @@ class NetworkHelper:
             stream.write_str(self.info['ap']['ip'])
             stream.write_str(self.info['ap']['mac'])
 
-        stream.write_bool(sys_onfig.wifi[enable])
+        stream.write_byte(1 if sys_onfig.wifi[enable] else 0)
         if not sys_onfig.wifi[enable]:
             stream.write_str(sys_onfig.wifi[ssid])
             stream.write_str(sys_onfig.wifi[pwd])
@@ -134,13 +134,14 @@ class NetworkHelper:
         with open('/tmp/interface.bin', 'wb') as f:
             f.write(stream.get_bytes())
 
+
     @staticmethod
     def release():
         if NetworkHelper._CLOSED:
             return
 
         del globals()['Stream']
-        del sys.modules['yuri.stream']
+        del sys.modules['yuri.stream_lite']
         del globals()['logger']
         del sys.modules['yuri.logger']
         del sys.modules['yuri.sys_config']
