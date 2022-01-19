@@ -19,14 +19,15 @@ class TCPServer:
         client_socket, remote = server_socket.accept()
         logger.debug('remote:{} {}'.format(remote[0], remote[1]))
         client_socket.settimeout(self._timeout)
-        # try:
-        done, callback = self._processor.handle_request(client_socket, {'remote': remote})
-        # except:
-        #    pass
-        # finally:
-        client_socket.close()
-        if callback:
-            callback()
+        try:
+            done, callback = self._processor.handle_request(client_socket, remote)
+            if callback:
+                callback()
+        except:
+            pass
+        finally:
+            client_socket.close()
+
 
     def start(self):
         micropython.alloc_emergency_exception_buf(100)

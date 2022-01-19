@@ -111,8 +111,10 @@ class Stream:
         self._check_read(size, 'String')
         return self._get_buff(size).decode('UTF-8')
 
-    def get_bytes(self) -> bytes:
-        return self._data
+    def get_bytes(self, nocheck=False) -> bytes:
+        if nocheck:
+            return self._data
+        return struct.pack('i', self.length()) + self._data
 
     def print_hex(self):
         print(' '.join('{:02X}'.format(a) for a in self._data))

@@ -6,7 +6,7 @@ INTEGER_MAX = 0x7fffffff
 INTEGER_MIN = -0x7fffffff - 1
 FLOAT_MAX = 3.4028235E38
 FLOAT_MIN = 1.4E-45
-STRING_MAX = BYTE_MAX
+STRING_MAX = 512
 
 
 class Stream:
@@ -70,21 +70,37 @@ class Stream:
     def write_str(self, wo: str):
         w = wo.encode('UTF-8')
         size = len(w)
-        self._check_write_length(size+1)
+        self._check_write_length(size + 1)
         if size > STRING_MAX:
             raise Exception(
                 "String out of the range, the maximum byte length of the utf8 string is {}.".format(STRING_MAX))
-        self.write_byte(size)
+        self._data += struct.pack('h', size)
         self._data += w
 
     def read_str(self) -> str:
-        size = self.read_byte()
+        size = struct.unpack('<h', self._get_buff(2))[0]
         self._check_read(size, 'String')
         return self._get_buff(size).decode('UTF-8')
 
-    def get_bytes(self) -> bytes:
-        return self._data
+    def get_bytes(self, nocheck=False) -> bytes:
+        if nocheck:
+            return self._data
+        return struct.pack('i', self.length()) + self._data
 
     def print_hex(self):
         print(' '.join('{:02X}'.format(a) for a in self._data))
 
+
+# if __name__ == '__main__':
+#     ostream = Stream()
+#     ostream.write_byte(0)
+#     ostream.write_int(999999999)
+#     ostream.write_float(0.5)
+#     ostream.write_str('testtest')
+#     ostream.print_hex()
+#
+#     buff = ostream.get_bytes()
+#
+#     istream = Stream(buff)
+#     istream.print_hex()
+#     print(istream.read_int() == istream.length())

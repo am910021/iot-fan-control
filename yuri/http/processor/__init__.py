@@ -19,10 +19,8 @@ class Processor:
         if self._debug:
             logger.info('Http processor running on developer mode.')
 
-    def handle_request(self, client_socket, tcp_request):
-        http_request = dict(tcp_request)
-        http_request['debug'] = self._debug
-        http_request['ver'] = VERSION
+    def handle_request(self, client_socket, remote):
+        http_request = {'remote': remote, 'debug': self._debug}
 
         try:
             gc.collect()
@@ -30,6 +28,7 @@ class Processor:
             poller = select.poll()
             poller.register(client_socket, select.POLLIN)
             res = poller.poll(1000)  # time in milliseconds
+            # 如果1秒內完全沒有socket資料傳輸，就斷斷開連線
             if not res:
                 client_socket.close()
                 return True, None
@@ -96,7 +95,7 @@ class Processor:
                 if 'authorization' not in headers:
                     return self.unauthorized_error(client_socket)
                 else:
-                    remote = tcp_request['remote']
+                    remote = http_request['remote']
                     if not self.is_authorized(headers['authorization']):
                         logger.info("UNAUTHORIZED {}".format(remote))
                         return self.unauthorized_error(client_socket)

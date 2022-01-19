@@ -1,4 +1,4 @@
-from machine import UART, Pin
+from machine import UART
 from yuri.stream_lite import Stream
 import gc
 
@@ -20,7 +20,7 @@ class UartReader:
         else:
             self._id = id(self)
             UartReader._instance = self
-            self._uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9), txbuf=256, rxbuf=256)
+            self._uart = UART(1, baudrate=115200, tx=33, rx=32, txbuf=256, rxbuf=256)
             self._stream = None
 
     def get_id(self):

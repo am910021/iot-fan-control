@@ -4,7 +4,7 @@ from yuri.http.tcpserver import TCPServer
 from yuri.http.processor.file import FileProcess
 from yuri.http.processor.logic import LogicProcess
 from yuri.http.handler import network
-from yuri.http.handler import fan_control
+#from yuri.http.handler import fan_control
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
@@ -20,13 +20,13 @@ network_handler = LogicProcess([
     (['reboot'], network.Reboot()),
 ])
 
-fan_handler = LogicProcess([
-    (['r', 'info'], fan_control.RTable()),
-])
+#fan_handler = LogicProcess([
+#    (['r', 'info'], fan_control.RTable()),
+#])
 
 processor = Processor(handlers=[
     ('/network', network_handler),
-    ('/fan', fan_handler),
+#    ('/fan', fan_handler),
     ('/', FileProcess('/www'))
 ], config=config)
 server = TCPServer(processor, config=config)
