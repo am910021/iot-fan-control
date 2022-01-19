@@ -1,10 +1,11 @@
 import gc, sys
 from yuri.sys_config import config as sys_config
 from yuri.http.tcpserver import TCPServer
-from yuri.http.processor.file import FileProcess
+# from yuri.http.processor.file import FileProcess
 from yuri.http.processor.logic import LogicProcess
-from yuri.http.handler import network
-#from yuri.http.handler import fan_control
+from yuri.http.handler import network, Index, Ico
+
+# from yuri.http.handler import fan_control
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
@@ -15,19 +16,22 @@ del globals()['sys_config']
 del sys.modules['yuri.sys_config']
 
 network_handler = LogicProcess([
-    (['info'], network.Info()),
-    (['edit'], network.Edit()),
-    (['reboot'], network.Reboot()),
+    ([''], Index()),
+    (['index.html'], Index()),
+    (['favicon.ico', Ico()]),
+    (['network', 'info'], network.Info()),
+    (['network', 'edit'], network.Edit()),
+    (['network', 'reboot'], network.Reboot()),
 ])
 
-#fan_handler = LogicProcess([
+# fan_handler = LogicProcess([
 #    (['r', 'info'], fan_control.RTable()),
-#])
+# ])
 
 processor = Processor(handlers=[
-    ('/network', network_handler),
-#    ('/fan', fan_handler),
-    ('/', FileProcess('/www'))
+    ('/', network_handler),
+    #    ('/fan', fan_handler),
+    #    ('/', FileProcess('/www'))
 ], config=config)
 server = TCPServer(processor, config=config)
 server.start()

@@ -131,7 +131,7 @@ class NetworkHelper:
             stream.write_str(self.info['wifi']['mac'])
 
         with open('/tmp/interface.bin', 'wb') as f:
-            f.write(stream.get_bytes())
+            f.write(stream.get_bytes(True))
 
     @staticmethod
     def release():

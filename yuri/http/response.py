@@ -1,5 +1,5 @@
 import gc, json
-from yuri.http.share import BufferOverflowException, BUFFER_SIZE
+from yuri.http.share import BufferOverflowException, BUFFER_SIZE, exists, NotFoundException
 
 
 class Html:
@@ -31,7 +31,7 @@ class Html:
         with open('/template/' + file, 'r') as f:
             while True:
                 gc.collect()
-                #print(gc.mem_free())
+                # print(gc.mem_free())
                 line = f.readline(BUFFER_SIZE + 1)
                 if len(line) > BUFFER_SIZE:
                     raise BufferOverflowException('The file single-line string exceeds {}.'.format(BUFFER_SIZE))
@@ -45,7 +45,37 @@ class Html:
 
 
 class Json:
-
     @staticmethod
     def response(data: dict, status=200, callback=None):
         return status, 'application/json', lambda stream: stream.write(json.dumps(data).encode('UTF-8')), callback
+
+
+class File:
+    @staticmethod
+    def response(path, content_type, status=200, callback=None):
+        if not exists(path):
+            raise NotFoundException()
+        return status, content_type, (lambda stream: File.stream_file(stream, path)), callback
+
+    @staticmethod
+    def create_buffer():
+        _block_size = BUFFER_SIZE
+        while True:
+            if _block_size < 1:
+                raise Exception("Unable to allocate buffer")
+            try:
+                return bytearray(_block_size)
+            except MemoryError:
+                _block_size //= 2
+
+    @staticmethod
+    def stream_file(stream, file):
+        f = open(file, 'r')
+        buf = File.create_buffer()
+        while True:
+            n = f.readinto(buf)
+            if n:
+                stream.write(buf[:n])
+            else:
+                break
+        f.close()
