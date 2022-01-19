@@ -39,7 +39,7 @@ class Logger:
         self.print(Logger.ERROR, '[Error] ' + message.format(*args, **kwargs))
 
     def print(self, Level, msg):
-        if not Level in self._levels:
+        if Level not in self._levels:
             return
         print(msg)
 

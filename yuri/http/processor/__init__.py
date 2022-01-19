@@ -1,7 +1,8 @@
 import gc
+import select
 import sys
 from yuri.logger import logger
-from ..share import *
+from yuri.http.share import *
 
 logger.set_levels([0, 1, 2, 3])
 
@@ -25,6 +26,13 @@ class Processor:
 
         try:
             gc.collect()
+
+            poller = select.poll()
+            poller.register(client_socket, select.POLLIN)
+            res = poller.poll(1000)  # time in milliseconds
+            if not res:
+                client_socket.close()
+                return True, None
 
             heading = self.parse_heading(client_socket.readline().decode('UTF-8'))
             http_request.update(heading)
@@ -174,7 +182,7 @@ class Processor:
     @staticmethod
     def response(client_socket, response):
         Processor.serialize(client_socket, response)
-        return True, None
+        return True, response['callback']
 
     @staticmethod
     def serialize(stream, response):
@@ -188,10 +196,8 @@ class Processor:
         #
         # Write the body, if it's present
         #
-        if 'body' in response:
-            body = response['body']
-            if body:
-                body(stream)
+        if 'body' in response and response['body']:
+            response['body'](stream)
 
     def unauthorized_error(self, client_socket):
         return Processor.error(client_socket, 401, "Unauthorized", None, {'www-authenticate': "Basic realm={}".format(self._config['realm'])})
@@ -225,6 +231,7 @@ class Processor:
             'headers': dict_update({
                 'content-type': "text/html",
             }, headers),
+            'callback': None,
             'body': lambda stream: Processor.write_html(stream,
                                                         '<html><body><header>{}/{}<hr></header>'.format(SERVER_NAME, VERSION).encode('UTF-8'),
                                                         ef,

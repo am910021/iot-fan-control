@@ -17,13 +17,16 @@ class TCPServer:
     def handle_accept(self, server_socket):
         gc.collect()
         client_socket, remote = server_socket.accept()
+        logger.debug('remote:{} {}'.format(remote[0], remote[1]))
         client_socket.settimeout(self._timeout)
-        #try:
-        done, response = self._processor.handle_request(client_socket, {'remote': remote})
-        #except:
+        # try:
+        done, callback = self._processor.handle_request(client_socket, {'remote': remote})
+        # except:
         #    pass
-        #finally:
+        # finally:
         client_socket.close()
+        if callback:
+            callback()
 
     def start(self):
         micropython.alloc_emergency_exception_buf(100)
@@ -34,7 +37,7 @@ class TCPServer:
         self._server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self._server_socket.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         self._server_socket.bind((self._address, self._port))
-        self._server_socket.listen(0)
+        self._server_socket.listen(5)
         self._server_socket.setsockopt(socket.SOL_SOCKET, SO_REGISTER_HANDLER, self.handle_accept)
         logger.info('Server listen on: {} , port: {}'.format(self._address, self._port))
 

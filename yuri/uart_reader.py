@@ -2,6 +2,7 @@ from machine import UART, Pin
 from yuri.stream_lite import Stream
 import gc
 
+
 class UartReader:
     _instance = None
     _UART_ID = 8204
@@ -15,18 +16,18 @@ class UartReader:
     def __init__(self):
         if UartReader._instance is not None:
             pass
-            #raise Exception('only one instance can exist')
+            # raise Exception('only one instance can exist')
         else:
             self._id = id(self)
             UartReader._instance = self
-            self._uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9), txbuf=1024, rxbuf=1024)
-            self._stream=None
-    
+            self._uart = UART(1, baudrate=115200, tx=Pin(8), rx=Pin(9), txbuf=256, rxbuf=256)
+            self._stream = None
+
     def get_id(self):
         return self._id
-    
-    def isAvailable(self):
-        self._stream=None
+
+    def is_available(self):
+        self._stream = None
         buff = self._uart.read()
         if not buff or len(buff) < 2:
             return False
@@ -34,14 +35,14 @@ class UartReader:
         uart_id = stream.read_int()
         if uart_id != UartReader._UART_ID:
             return False
-        
+
         self._stream = stream
         return True
-        
-    
-    def getStream(self) -> Stream:
+
+    def get_stream(self) -> Stream:
         stream = self._stream
         gc.collect()
         return stream
-        
+
+
 uart = UartReader.get_instance()

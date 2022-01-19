@@ -17,16 +17,12 @@ class LogicProcess:
             headers = http_request['headers']
             if 'body' in http_request and 'content-type' in headers:
                 if headers['content-type'] == "application/json":
-                    print("is application/json")
                     try:
                         body = json.loads(http_request['body'])
                     except Exception as e:
                         raise BadRequestException("Failed to load JSON: {}".format(e))
                 elif headers['content-type'] == "application/x-www-form-urlencoded":
-                    print("is application/x-www-form-urlencoded")
                     a,body = self.extract_query('?'+http_request['body'].decode('utf8'))
-                else:
-                    print("not anything")
 
             verb = http_request['verb']
             api_request = {
@@ -36,16 +32,16 @@ class LogicProcess:
                 'body': body,
                 'http': http_request
             }
-            code, content_type, response = 500, "text/html", None
+            code, content_type, response, callback = 500, "text/html", None, None
             logger.info("ACCESS {} {}".format(http_request['remote'], http_request['path']))
             if verb == 'get':
-                code, content_type, response = handler.get(api_request)
+                code, content_type, response, callback = handler.get(api_request)
             elif verb == 'put':
-                code, content_type, response = handler.put(api_request)
+                code, content_type, response, callback = handler.put(api_request)
             elif verb == 'post':
-                code, content_type, response = handler.post(api_request)
+                code, content_type, response, callback = handler.post(api_request)
             elif verb == 'delete':
-                code, content_type, response = handler.delete(api_request)
+                code, content_type, response, callback = handler.delete(api_request)
             else:
                 # TODO add support for more verbs!
                 error_message = "Unsupported verb: {}".format(verb)
@@ -60,7 +56,8 @@ class LogicProcess:
                 # 'content-length': len(data) if data else 0
                 'content_type': content_type
             },
-            'body': response
+            'body': response,
+            'callback': callback
         }
         return ret
 

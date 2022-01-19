@@ -188,7 +188,8 @@ class FileProcess:
                 'content-type': content_type,
                 #'content-length': length
             },
-            'body': body
+            'body': body,
+            'callback': None
         }
 
     @staticmethod

@@ -19,10 +19,10 @@ rels = [
 def control():
     time.sleep(100/1000)
         
-    if not uart.isAvailable():
+    if not uart.is_available():
         return
         
-    stream = uart.getStream()
+    stream = uart.get_stream()
     stream.print_hex()
         
 if __name__ == '__main__':

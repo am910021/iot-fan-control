@@ -1,16 +1,16 @@
 import gc, json
-from .share import BufferOverflowException, BUFFER_SIZE
+from yuri.http.share import BufferOverflowException, BUFFER_SIZE
 
 
 class Html:
 
     @staticmethod
-    def response(template_name, params={}, status=200):
+    def response(template_name, data={}, status=200, callback=None):
         gc.collect()
-        return status, 'text/html', (lambda stream: Html.stream_file(stream, template_name, params))
+        return status, 'text/html', (lambda stream: Html.stream_file(stream, template_name, data)), callback
 
     @staticmethod
-    def replace_template_params(line: str, params: dict) -> str:
+    def replace_template_params(line: str, data: dict) -> str:
         while True:
             bri = line.find('|}')
             if bri < 0:
@@ -19,24 +19,24 @@ class Html:
             if bli < 0:
                 return line
             name = line[bli + 2:bri]
-            if params and name in params:
-                line = line.replace('{|' + name + '|}', str(params[name]))
+            if data and name in data:
+                line = line.replace('{|' + name + '|}', str(data[name]))
                 continue
             else:
                 line = line.replace('{|' + name + '|}', '')
                 continue
 
     @staticmethod
-    def stream_file(stream, file, params: dict):
+    def stream_file(stream, file, data: dict):
         with open('/template/' + file, 'r') as f:
             while True:
                 gc.collect()
-                print(gc.mem_free())
+                #print(gc.mem_free())
                 line = f.readline(BUFFER_SIZE + 1)
                 if len(line) > BUFFER_SIZE:
-                    raise BufferOverflowException('The read file buffer exceeds {}.'.format(BUFFER_SIZE))
+                    raise BufferOverflowException('The file single-line string exceeds {}.'.format(BUFFER_SIZE))
                 if '|}' in line:
-                    line = Html.replace_template_params(line, params)
+                    line = Html.replace_template_params(line, data)
 
                 if line:
                     stream.write(line)
@@ -47,5 +47,5 @@ class Html:
 class Json:
 
     @staticmethod
-    def response(data: dict, status=200):
-        return status, 'application/json', lambda stream: stream.write(json.dumps(data).encode('UTF-8'))
+    def response(data: dict, status=200, callback=None):
+        return status, 'application/json', lambda stream: stream.write(json.dumps(data).encode('UTF-8')), callback

@@ -19,7 +19,7 @@ class Config:
         self.http = {}
         self.ap = {}
         self.wifi = {}
-        self.default_is_loaded=False
+        self.default_is_loaded = False
         if self.has_config_file():
             self.load_config()
         else:
@@ -50,17 +50,14 @@ class Config:
         self.wifi['enable'] = False
         self.wifi['ssid'] = ''
         self.wifi['password'] = ''
-        self.default_is_loaded=True
+        self.default_is_loaded = True
 
     def has_config_file(self):
         folders = os.listdir()
         return 'config.txt' in folders
 
     def save_config(self):
-        setting = {}
-        setting['http'] = self.http
-        setting['ap'] = self.ap
-        setting['wifi'] = self.wifi
+        setting = {'http': self.http, 'ap': self.ap, 'wifi': self.wifi}
         with open('config.txt', 'w') as jsonfile:
             json.dump(setting, jsonfile)
 

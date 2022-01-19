@@ -70,11 +70,11 @@ class Stream:
     def write_str(self, wo: str):
         w = wo.encode('UTF-8')
         size = len(w)
-        self._check_write_length(size)
+        self._check_write_length(size+1)
         if size > STRING_MAX:
             raise Exception(
                 "String out of the range, the maximum byte length of the utf8 string is {}.".format(STRING_MAX))
-        self._data += struct.pack('b', size)
+        self.write_byte(size)
         self._data += w
 
     def read_str(self) -> str:
