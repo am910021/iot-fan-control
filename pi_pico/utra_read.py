@@ -1,11 +1,11 @@
 from machine import UART, Pin
 from yuri.stream import Stream
 import time
-UART_Tx_BUFFER_LENGTH = 1024
-UART_Rx_BUFFER_LENGTH = 1024
+UART_Tx_BUFFER_LENGTH = 256
+UART_Rx_BUFFER_LENGTH = 256
 
 class UartTest:
-    def __init__(self, uartPort=1 ,baudRate=115200, txPin=(8), rxPin=(9)):
+    def __init__(self, uartPort=0 ,baudRate=115200, txPin=(0), rxPin=(1)):
         self.__uartPort=uartPort
         self.__baudRate=baudRate
         self.__txPin=txPin
