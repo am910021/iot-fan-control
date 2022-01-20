@@ -6,9 +6,6 @@ import gc
 
 
 class Info:
-    def __init__(self):
-        pass
-
     def get(self, api_request):
         gc.collect()
         info = {}
@@ -49,9 +46,6 @@ class Info:
 
 
 class Edit:
-    def __init__(self):
-        pass
-
     def post(self, request):
         gc.collect()
         config = getattr(getattr(__import__('yuri.sys_config'), 'sys_config'), 'config')
@@ -117,9 +111,6 @@ class Edit:
 
 
 class Reboot:
-    def __init__(self):
-        pass
-
     def get(self, request):
         params = {'page_title': 'Reboot info'}
         return Html.response('reboot/info.html', data=params)

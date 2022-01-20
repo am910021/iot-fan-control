@@ -27,6 +27,7 @@ class TCPServer:
             pass
         finally:
             client_socket.close()
+            print(gc.mem_free())
 
 
     def start(self):

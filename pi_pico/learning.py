@@ -1,5 +1,6 @@
 import time
 
+
 class Learning:
     def __init__(self):
 
@@ -39,21 +40,24 @@ class Learning:
                 room_score = self.R[state][action]
                 if room_score == -1:
                     continue
-                
+
                 qMax = max(self.Q[action])
                 self.Q[state][action] = self.R[state][action] + self.RATE * qMax
 
-    def printQ(self):
+    def learn_for_time(self, times):
+        for i in range(times):
+            self.learn()
+
+    def print_q(self):
         for i in self.Q:
             print(i)
-            
-            
+
 
 if __name__ == '__main__':
     start_time = time.ticks_ms()
     learn = Learning()
-    for i in range(10000):
+    for i in range(1000):
         learn.learn()
-    #learn.printQ()
+    learn.print_q()
     end_time = time.ticks_ms()
     print("runtime %f milliseconds" % (end_time-start_time))

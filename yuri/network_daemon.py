@@ -138,42 +138,12 @@ class NetworkHelper:
         if NetworkHelper._CLOSED:
             return
 
-        del globals()['Stream']
-        del sys.modules['yuri.stream_lite']
-        del globals()['logger']
-        del sys.modules['yuri.logger']
+        del globals()['network']
         del globals()['sys_config']
         del sys.modules['yuri.sys_config']
+        del globals()['logger']
+        del globals()['Stream']
+        del sys.modules['yuri.stream_lite']
         del sys.modules['yuri']
-        del globals()['network']
-        del globals()['time']
 
         NetworkHelper._CLOSED = True
-
-
-'''
-if __name__ == '__main__':
-    print(gConfig.ap)
-    networkd = NetworkHelper()
-    networkd.doConnect()
-    networkd.createAP()
-    networkd.saveInfo()
-    #print(sys.modules)
-    #print(8,gc.mem_free())
-    #networkd.close()
-    #del Stream
-    #del sys.modules['yuri.stream']
-    #del logger
-    #del sys.modules['yuri.logger']
-    #del config
-    #del sys.modules['yuri.config']
-    #del sys.modules['yuri']
-    #del network
-    #del time
-    #del os
-
-    gc.collect()
-
-    print(9,gc.mem_free())
-    print(sys.modules)
-'''

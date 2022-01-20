@@ -4,8 +4,6 @@ import sys
 from yuri.logger import logger
 from yuri.http.share import *
 
-logger.set_levels([0, 1, 2, 3])
-
 
 class Processor:
     DEBUG_MODE = False

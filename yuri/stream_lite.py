@@ -11,7 +11,7 @@ STRING_MAX = 512
 
 class Stream:
     def __init__(self, stream=b"", limit=2048):
-        self._data = stream
+        self._data = stream if stream else b""
         self._limit = limit
 
     def length(self):

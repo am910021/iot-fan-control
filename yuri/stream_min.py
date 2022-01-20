@@ -3,7 +3,7 @@ import struct
 
 class Stream:
     def __init__(self, stream=b"", limit=None):
-        self._data = stream
+        self._data = stream if stream else b""
 
     def length(self):
         return len(self._data)

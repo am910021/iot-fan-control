@@ -17,7 +17,7 @@ STRING_MAX = 1024
 
 class Stream:
     def __init__(self, stream=b"", limit=INTEGER_MAX):
-        self._data = stream
+        self._data = stream if stream else b""
         self._limit = limit
 
     def length(self):
@@ -144,4 +144,3 @@ class Stream:
 #     print(stream.read_float())
 #     print(stream.read_str())
 #     print(stream.read_str())
-

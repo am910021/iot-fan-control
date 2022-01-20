@@ -5,11 +5,11 @@ from yuri.http.tcpserver import TCPServer
 from yuri.http.processor.logic import LogicProcess
 from yuri.http.handler import network, Index, Ico
 
-# from yuri.http.handler import fan_control
+from yuri.http.handler import fan_control
 from yuri.http.processor import Processor
 from yuri.logger import logger
 
-logger.set_levels([0, 1, 2, 3])
+logger.set_levels([3])
 
 config = dict(sys_config.http)
 del globals()['sys_config']
@@ -22,6 +22,7 @@ network_handler = LogicProcess([
     (['network', 'info'], network.Info()),
     (['network', 'edit'], network.Edit()),
     (['network', 'reboot'], network.Reboot()),
+    (['table', 'info'], fan_control.RTable()),
 ])
 
 # fan_handler = LogicProcess([
