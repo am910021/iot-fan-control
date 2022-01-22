@@ -26,6 +26,7 @@ network_handler = LogicProcess([
     (['table', 'edit', 'r'], fan_control.RTable()),
     (['table', 'info', 'q'], fan_control.QTable()),
     (['fan', 'info', ], fan_control.FanSensorPair()),
+    (['fan', 'edit', ], fan_control.FanSensorPair()),
 ])
 
 # fan_handler = LogicProcess([

@@ -2,12 +2,11 @@
 <title>{|title|}</title></head><body>
 <h3 style="color: red;">{|error|}</h3><h3 style="color: green;">{|success|}</h3>
 <h3>Fan & Sensor pair</h3>
-<pre>{|table|}</pre><br><br>
-<form method="post" action="/table/edit/r">
+<pre>{|table|}</pre><br>
+<form method="post" action="/fan/edit">
     <h4>請在下方輸入新的Fan與Sensor值，僅接受GPIO編號</h4>
     <textarea name="table" cols="40" rows="10">{|fst|}</textarea><br>
      <input type="submit" value="Submit"><span>   </span><input type="reset" value="Reset"><br>
-</form><br><br>
-
-
+</form><br>
+ <a href="/">Home</a>
 </body></html>

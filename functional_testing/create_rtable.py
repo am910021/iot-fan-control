@@ -8,6 +8,7 @@ import _thread
 class Status:
     learn_running = False
 
+
 def exists(path):
     try:
         os.stat(path)
@@ -96,6 +97,9 @@ def tw():
 
 def read_file(path) -> Stream:
     stream = None
+    if not exists(path):
+        return None
+
     with open(path, 'rb') as f:
         stream = Stream(f.read())
         stream.read_int()  # size check
@@ -108,7 +112,6 @@ def read_table(name):
     if not stream:
         return []
 
-    stream.read_int()  # size check
     size = stream.read_byte()
     T = []
     for i in range(size):
@@ -192,6 +195,7 @@ def uart_handler(uart):
     #  計算Q table
     elif op == 43:
         Status.learn_running = True
+    #  寫入fs.table
     elif op == 50:
         fstream = Stream(istream.get_bytes(True))
         with open('fs.table', 'wb') as f:
@@ -204,12 +208,14 @@ def uart_handler(uart):
         ostream.write_byte(fstream.read_byte())
         ostream.print_hex()
         uart.write(ostream.get_bytes())
-    elif op==51:
+    #  讀取fs.table
+    elif op == 51:
         ostream = Stream()
         ostream.write_int(1226)
         fstream = read_file('fs.table')
         if not fstream:
             ostream.write_byte(-1)
+            return
         fstream.print_hex()
         ostream.write(fstream.get_bytes(True))
         uart.write(ostream.get_bytes())
@@ -225,18 +231,25 @@ def uart_handler(uart):
         print('unknown op code {}'.format(op))
 
 
-def thread_learning():
-    while True:
-        gc.collect()
-        if Status.learn_running:
-            time.sleep(0.5)
-            print('Learning start')
-            learn = Learning(read_table('r'), 0.8)
-            learn.learn_for_time(1000)
-            learn.write_qtable()
-            Status.learn_running = False
+def run_learning():
+    if Status.learn_running:
         time.sleep(0.5)
+        print('Learning start')
+        learn = Learning(read_table('r'), 0.8)
+        learn.learn_for_time(1000)
+        learn.write_qtable()
+        Status.learn_running = False
 
+
+def second_thread():
+    while True:
+        try:
+            gc.collect()
+            run_learning()
+        except Exception as e:
+            sys.print_exception(e)
+        finally:
+            time.sleep(0.5)
 
 
 def handler():
@@ -253,7 +266,25 @@ def handler():
         sys.print_exception(e)
 
 
+def create_blank_fs_table():
+    table = [[-1, -1], [-1, -1]]
+    fstream = Stream()
+    fstream.write_byte(len(table))
+    for i in table:
+        fstream.write_byte(i[0])
+        fstream.write_byte(i[1])
+    with open('/tmp/rs.table') as f:
+        f.write(fstream.get_bytes())
 
+def create_blank_r_table():
+    table = [[-1, -1], [-1, -1]]
+    fstream = Stream()
+    fstream.write_byte(len(table))
+    for i in table:
+        fstream.write_byte(i[0])
+        fstream.write_byte(i[1])
+    with open('/tmp/rs.table') as f:
+        f.write(fstream.get_bytes())
 
 if __name__ == '__main__':
     start = time.ticks_ms()
@@ -264,8 +295,5 @@ if __name__ == '__main__':
 
     tw()
     Status.learn_running = True
-    _thread.start_new_thread(thread_learning, ())
+    _thread.start_new_thread(second_thread, ())
     handler()
-
-
-
