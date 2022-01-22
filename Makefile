@@ -28,12 +28,11 @@ copy_to_dist:
 	@cp esp-series/boot.py build/dist
 
 esp32: build
-	@cp build/mpy/esp-series/blank.mpy build/dist/detach_repl.mpy
-	@cp build/mpy/esp-series/uart_pin-esp32.mpy build/dist/lib/yuri/uart_pin.mpy
+	@rm build/dist/lib/yuri/http/handler/fan_control_esp8266.mpy
 
 esp8266: build
-	@cp build/mpy/esp-series/uart_pin-esp8266.mpy build/dist/lib/yuri/uart_pin.mpy
 	@cp esp-series/main_esp8266.py build/dist/main.py
+	@mv build/dist/lib/yuri/http/handler/fan_control_esp8266.mpy build/dist/lib/yuri/http/handler/fan_control.mpy
 
 build/mpy/%.mpy: %.py
 	@mkdir -p $(@D)

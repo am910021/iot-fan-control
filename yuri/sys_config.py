@@ -60,6 +60,7 @@ class Config:
         setting = {'http': self.http, 'ap': self.ap, 'wifi': self.wifi}
         with open('config.txt', 'w') as jsonfile:
             json.dump(setting, jsonfile)
+            jsonfile.close()
 
     def load_config(self):
         try:
@@ -89,6 +90,7 @@ class Config:
                 self.wifi['enable'] = wifi['enable'] is True
                 self.wifi['ssid'] = wifi['ssid']
                 self.wifi['password'] = wifi['password']
+                jsonfile.close()
                 gc.collect()
         except IndexError:
             raise Exception('The config.txt key/value attribute is wrong, please check the file or delete it.')

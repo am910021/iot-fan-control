@@ -42,6 +42,7 @@ class Html:
                     stream.write(line)
                 else:
                     break
+            f.close()
 
 
 class Json:
@@ -70,12 +71,19 @@ class File:
 
     @staticmethod
     def stream_file(stream, file):
-        f = open(file, 'r')
-        buf = File.create_buffer()
-        while True:
-            n = f.readinto(buf)
-            if n:
-                stream.write(buf[:n])
-            else:
-                break
-        f.close()
+        with open(file, 'r') as f:
+            buf = File.create_buffer()
+            while True:
+                n = f.readinto(buf)
+                if n:
+                    stream.write(buf[:n])
+                else:
+                    break
+            f.close()
+
+
+#class Redirect:
+
+#    @staticmethod
+#    def response(location, status=302, callback=None):
+

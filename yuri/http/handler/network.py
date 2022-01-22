@@ -1,5 +1,8 @@
 # my_api.py
 import sys
+
+import time
+
 from yuri.http.response import Html
 from yuri.http.share import dict_update
 import gc
@@ -11,7 +14,7 @@ class Info:
         info = {}
         info['page_title'] = 'Network daemon'
         null = "null"
-        Stream = getattr(getattr(__import__('yuri.stream_lite'), 'stream_lite'), 'Stream')
+        Stream = getattr(getattr(__import__('yuri.stream_min'), 'stream_min'), 'Stream')
         with open('/tmp/interface.bin', 'rb') as f:
             stream = Stream(f.read())
             if stream.read_byte() == 1:
@@ -40,7 +43,7 @@ class Info:
                 info['wifi_mac'] = stream.read_str()
                 info['wifi_ip'] = null
             f.close()
-            del sys.modules['yuri.stream_lite']
+            del sys.modules['yuri.stream_min']
             gc.collect()
         return Html.response('network/info.html', info)
 
@@ -80,6 +83,7 @@ class Edit:
         setting = {'http':http, 'ap':ap, 'wifi':wifi}
         with open('config.txt', 'w') as jsonfile:
             json.dump(setting, jsonfile)
+            jsonfile.close()
         json = None
         return Html.response('network/edit.html', dict_update(Edit.get_info(), {
             'success': 'config save success, please click reboot button.'}))
@@ -120,5 +124,6 @@ class Reboot:
         return Html.response('reboot/success.html', data=params, callback=self.reboot)
 
     def reboot(self):
+        time.sleep(0.2)
         machine = __import__('machine')
         machine.reset()

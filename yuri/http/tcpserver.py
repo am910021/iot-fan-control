@@ -21,12 +21,13 @@ class TCPServer:
         client_socket.settimeout(self._timeout)
         try:
             done, callback = self._processor.handle_request(client_socket, remote)
+            client_socket.close()
+
             if callback:
                 callback()
         except:
             pass
         finally:
-            client_socket.close()
             print(gc.mem_free())
 
 

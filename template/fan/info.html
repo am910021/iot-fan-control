@@ -1,12 +1,13 @@
 <!DOCTYPE html><html lang="zh-Hant-TW"><head><meta charset="UTF-8">
 <title>{|title|}</title></head><body>
 <h3 style="color: red;">{|error|}</h3><h3 style="color: green;">{|success|}</h3>
-<h3>{|name|} Table info</h3>
-<pre>{|rti|}</pre><br><br>
+<h3>Fan & Sensor pair</h3>
+<pre>{|table|}</pre><br><br>
 <form method="post" action="/table/edit/r">
-    <h4>請在下方輸入新的R Table值</h4>
-    <textarea name="rtable" cols="40" rows="10">{|rt|}</textarea><br>
+    <h4>請在下方輸入新的Fan與Sensor值，僅接受GPIO編號</h4>
+    <textarea name="table" cols="40" rows="10">{|fst|}</textarea><br>
      <input type="submit" value="Submit"><span>   </span><input type="reset" value="Reset"><br>
 </form><br><br>
-<a href="/">Home</a> <a href="/table/info/q">Q Table info</a>
+
+
 </body></html>

@@ -132,6 +132,7 @@ class NetworkHelper:
 
         with open('/tmp/interface.bin', 'wb') as f:
             f.write(stream.get_bytes(True))
+            f.close()
 
     @staticmethod
     def release():

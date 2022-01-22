@@ -1,15 +1,15 @@
-import gc, sys
+import os, gc, sys, time
 
 
-
-# 關閉esp8266的repl釋放uart0
+# 倒數10秒，在10秒期間repl還可以作用
 start = time.ticks_ms()
 countdown = 10
 while (time.ticks_ms() - start) < (countdown * 1000):
     print('%d seconds left for repl to detach from uart0.' % (countdown - round((time.ticks_ms() - start) / 1000)))
     time.sleep(1)
 
-#os.dupterm(None, 1)
+# 關閉esp8266的repl釋放uart0
+os.dupterm(None, 1)
 del globals()['start']
 del globals()['countdown']
 del globals()['time']
