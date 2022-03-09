@@ -17,5 +17,5 @@ def get_uart_str(opcode):
     gc.collect()
      
 
-print(get_uart_str(43))
+print(get_uart_str(127))
 

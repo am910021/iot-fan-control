@@ -8,6 +8,8 @@ import _thread
 class Status:
     learn_running = False
 
+    UART_SERIAL = 1226
+
 
 def exists(path):
     try:
@@ -15,6 +17,12 @@ def exists(path):
         return True
     except OSError:
         return False
+
+
+def create_out_stream() -> Stream:
+    ostream = Stream()  # 開啟串流
+    ostream.write_int(1226)  # 寫入Uart的專屬編號
+    return ostream
 
 
 class Learning:
@@ -62,37 +70,8 @@ class Learning:
         for i in self._qtable:
             for j in i:
                 stream.write_byte(round(j))
-        with open('q.table', 'wb') as f:
+        with open('/tmp/q.table', 'wb') as f:
             f.write(stream.get_bytes())
-
-
-def tw():
-    R = [
-        [-1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1],
-        [-1, -1, -1, -1, -1, -1]
-    ]
-
-    R2 = [
-        [-1, -1, -1, -1, 0, -1],
-        [-1, -1, -1, 0, -1, 100],
-        [-1, -1, -1, 0, -1, -1],
-        [-1, 0, 0, -1, 0, -1],
-        [0, -1, -1, 0, -1, 100],
-        [-1, 0, -1, -1, 0, 100]
-    ]
-    stream = Stream()
-    stream.write_byte(len(R))
-    for i in R:
-        for j in i:
-            stream.write_byte(j)
-    with open('r.table', 'wb') as f:
-        stream.print_hex()
-        f.write(stream.get_bytes())
-    return R
 
 
 def read_file(path) -> Stream:
@@ -108,35 +87,35 @@ def read_file(path) -> Stream:
 
 
 def read_table(name):
-    stream = read_file(name + '.table')
+    stream = read_file('/tmp/' + name + '.table')
     if not stream:
         return []
 
     size = stream.read_byte()
-    T = []
+    table = []
     for i in range(size):
         tmp = []
         for j in range(size):
             buff = stream.read_byte()
             tmp.append(buff)
-        T.append(tmp)
-    return T
+        table.append(tmp)
+    return table
 
 
 def create_str_table(name):
-    T = read_table(name)
-    ret = '    ' + '  '.join(['{0: >3}'.format(e + 1) for e in range(len(T))]) + '\n'
-    ret += '   |' + '-'.join(['----' for e in range(len(T))]) + '\n'
-    for i in range(len(T)):
+    table = read_table(name)
+    ret = '    ' + '  '.join(['{0: >3}'.format(e + 1) for e in range(len(table))]) + '\n'
+    ret += '   |' + '-'.join(['----' for e in range(len(table))]) + '\n'
+    for i in range(len(table)):
         ret += '{0: >4}'.format(str(i + 1) + '|')
-        ret += ', '.join(['{0: >3}'.format(e) for e in T[i]]) + '\n'
+        ret += ', '.join(['{0: >3}'.format(e) for e in table[i]]) + '\n'
     return ret
 
 
 def uart_handler(uart):
     istream = Stream(uart.read())  # 讀取Uart的資料，並創建Stream
-    # 判斷istream資料大小是否足夠，判斷Uart的專屬編號(1226)是否正確
-    if istream.length() < 8 or istream.read_int() != istream.length() or istream.read_int() != 1226:
+    # 判斷istream資料大小是否足夠，判斷Uart的專屬編號(Status.UART_SERIAL)是否正確
+    if istream.length() < 8 or istream.read_int() != istream.length() or istream.read_int() != Status.UART_SERIAL:
         return
 
     op = istream.read_byte()
@@ -145,8 +124,7 @@ def uart_handler(uart):
     # 處理前的R table
     if op == 12:
         rt = read_table('r')
-        ostream = Stream()
-        ostream.write_int(1226)
+        ostream = create_out_stream()
         ostream.write_byte(len(rt))
         for i in range(len(rt)):
             for j in range(len(rt)):
@@ -156,8 +134,7 @@ def uart_handler(uart):
     # 處理前的Q table
     elif op == 13:
         rt = read_table('q')
-        ostream = Stream()
-        ostream.write_int(1226)
+        ostream = create_out_stream()
         ostream.write_byte(len(rt))
         for i in range(len(rt)):
             for j in range(len(rt)):
@@ -166,28 +143,25 @@ def uart_handler(uart):
         uart.write(ostream.get_bytes())
     # 處理後的R table
     elif op == 22:
-        ostream = Stream()
-        ostream.write_int(1226)
+        ostream = create_out_stream()
         ostream.write_str(create_str_table('r'))
         ostream.print_hex()
         uart.write(ostream.get_bytes())
     # 處理後的Q table
     elif op == 23:
-        ostream = Stream()
-        ostream.write_int(1226)
+        ostream = create_out_stream()
         ostream.write_str(create_str_table('q'))
         ostream.print_hex()
         uart.write(ostream.get_bytes())
     # 儲存R table
     elif op == 32:
         fstream = Stream(istream.get_bytes(True))
-        with open('r.table', 'wb') as f:
+        with open('/tmp/r.table', 'wb') as f:
             print(fstream.length())
             fstream.print_hex()
             f.write(fstream.get_bytes())
             f.close()
-        ostream = Stream()
-        ostream.write_int(1226)
+        ostream = create_out_stream()
         ostream.write_byte(fstream.read_byte())
         ostream.print_hex()
         uart.write(ostream.get_bytes())
@@ -197,22 +171,46 @@ def uart_handler(uart):
         Status.learn_running = True
     #  寫入fs.table
     elif op == 50:
+        rt = []
+        istream.print_hex()
         fstream = Stream(istream.get_bytes(True))
-        with open('fs.table', 'wb') as f:
+        size = istream.read_byte()
+        try:
+            for i in range(size):
+                tmp = [-1, -1, 50, 50]
+                tmp[0], tmp[1] = istream.read_byte(), istream.read_byte()
+                tmp[2], tmp[3] = istream.read_byte(), istream.read_byte()
+                Pin(tmp[0], Pin.OUT)
+                Pin(tmp[1], Pin.OUT, Pin.PULL_DOWN)
+                if tmp[2] < 0 or tmp[2] > 100 or tmp[3] < 0 or tmp[3] > 100:
+                    ostream = create_out_stream()
+                    ostream.write_byte(-2)
+                    print('temperature err')
+                    uart.write(ostream.get_bytes())
+                    return
+                rt.append(tmp)
+        except:
+            print('except err')
+            ostream = create_out_stream()
+            ostream.write_byte(-1)
+            uart.write(ostream.get_bytes())
+            return
+
+        with open('/tmp/fs.table', 'wb') as f:
             print(fstream.length())
             fstream.print_hex()
             f.write(fstream.get_bytes())
             f.close()
-        ostream = Stream()
-        ostream.write_int(1226)
-        ostream.write_byte(fstream.read_byte())
+
+        ostream = create_out_stream()
+        ostream.write_byte(len(rt))
         ostream.print_hex()
+        print('no err')
         uart.write(ostream.get_bytes())
     #  讀取fs.table
     elif op == 51:
-        ostream = Stream()
-        ostream.write_int(1226)
-        fstream = read_file('fs.table')
+        ostream = create_out_stream()
+        fstream = read_file('/tmp/fs.table')
         if not fstream:
             ostream.write_byte(-1)
             return
@@ -220,20 +218,31 @@ def uart_handler(uart):
         ostream.write(fstream.get_bytes(True))
         uart.write(ostream.get_bytes())
 
-    elif op == 99:
-        ostream = Stream()
-        ostream.write_int(1226)
-        ostream.write_str(istream.read_str())
-        ostream.print_hex()
+    elif op == 127:
+        status = 0
+        if exists('/tmp/fs.table'):
+            os.remove('/tmp/fs.table')
+            create_blank_fs_table()
+            status += 1
+        if exists('/tmp/r.table'):
+            os.remove('/tmp/r.table')
+            data = [[-1 for x in range(6)] for y in range(6)]
+            create_blank_table_with('r', data)
+            status += 2
+        if exists('/tmp/q.table'):
+            os.remove('/tmp/q.table')
+            data = [[0 for x in range(6)] for y in range(6)]
+            create_blank_table_with('q', data)
+            status += 4
+        ostream = create_out_stream()
+        ostream.write_byte(status)
         uart.write(ostream.get_bytes())
-
     else:
         print('unknown op code {}'.format(op))
 
 
 def run_learning():
     if Status.learn_running:
-        time.sleep(0.5)
         print('Learning start')
         learn = Learning(read_table('r'), 0.8)
         learn.learn_for_time(1000)
@@ -261,30 +270,33 @@ def handler():
             gc.collect()
             uart_handler(uart)
             uart_handler(uart2)
-            time.sleep(0.5)
+            time.sleep(0.25)
     except Exception as e:
         sys.print_exception(e)
 
 
 def create_blank_fs_table():
-    table = [[-1, -1], [-1, -1]]
+    table = [[22, 21, 50, 50], [19, 20, 50, 50]]
     fstream = Stream()
     fstream.write_byte(len(table))
     for i in table:
         fstream.write_byte(i[0])
         fstream.write_byte(i[1])
-    with open('/tmp/rs.table') as f:
+        fstream.write_byte(i[2])
+        fstream.write_byte(i[3])
+    with open('/tmp/fs.table', 'wb') as f:
         f.write(fstream.get_bytes())
 
-def create_blank_r_table():
-    table = [[-1, -1], [-1, -1]]
+
+def create_blank_table_with(name, data):
     fstream = Stream()
-    fstream.write_byte(len(table))
-    for i in table:
-        fstream.write_byte(i[0])
-        fstream.write_byte(i[1])
-    with open('/tmp/rs.table') as f:
+    fstream.write_byte(len(data))
+    for i in data:
+        for j in i:
+            fstream.write_byte(j)
+    with open('/tmp/' + name + '.table', 'wb') as f:
         f.write(fstream.get_bytes())
+
 
 if __name__ == '__main__':
     start = time.ticks_ms()
@@ -293,7 +305,18 @@ if __name__ == '__main__':
         print('Execute Uart Handler program after %d seconds.' % (countdown - round((time.ticks_ms() - start) / 1000)))
         time.sleep(1)
 
-    tw()
+    if not exists('/tmp'):
+        os.mkdir('/tmp')
+    if not exists('/tmp/fs.table'):
+        create_blank_fs_table()
+    if not exists('/tmp/r.table'):
+        arr = [[-1 for x in range(6)] for y in range(6)]
+        create_blank_table_with('r', arr)
+    if not exists('/tmp/q.table'):
+        arr = [[0 for x in range(6)] for y in range(6)]
+        create_blank_table_with('q', arr)
     Status.learn_running = True
     _thread.start_new_thread(second_thread, ())
+    time.sleep(0.5)
     handler()
+

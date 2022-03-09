@@ -5,7 +5,7 @@ import time, sys
 from yuri.stream_min import Stream
 
 
-def create_OStream(opcode) -> Stream:
+def out_stream(opcode) -> Stream:
     ostream = Stream()  # 開啟串流
     ostream.write_int(1226)  # 寫入Uart的專屬編號
     ostream.write_byte(opcode)  # 寫入操作封包
@@ -37,13 +37,13 @@ def uart_send(ostream: Stream) -> Stream:
 
 def get_uart_str(opcode):
     gc.collect()
-    ostream = create_OStream(opcode)
+    ostream = out_stream(opcode)
     return parse_rtable(uart_send(ostream))
 
 
 def update_rtable(opcode, arr):
     gc.collect()
-    ostream = create_OStream(opcode)
+    ostream = out_stream(opcode)
     ostream.write_byte(len(arr))
     for i in range(len(arr)):
         for j in range(len(arr)):
@@ -90,19 +90,16 @@ class RTable:
         rtable = request['body']['rtable']
         rtable = rtable[:-6] if rtable[-6:] == '%0D%0A' else rtable
         rst = rtable.replace('%2C', ',').replace('+', '').split('%0D%0A')
-        print()
         rtable = None
         rt = []
         for i in rst:
             tmp = []
             tmp2 = i.split(',')
             if len(tmp2) != len(rst):
-                print(len(tmp2), len(rst))
                 return self.get_response(error='Incorrect R table value entered.')
             for j in tmp2:
                 tmp.append(int(j))
             rt.append(tmp)
-        print(rt)
         status = update_rtable(32, rt)
         if status != len(rst):
             return self.get_response(error='remote save R Table failed.')
@@ -136,37 +133,43 @@ class FanSensorPair:
 
         table = table[:-6] if table[-6:] == '%0D%0A' else table
         rst = table.replace('%2C', ',').replace('+', '').split('%0D%0A')
-        ttable = []
+        tmp_table = []
         for i in rst:
             tmp = i.split(',')
-            if len(tmp) != 2:
+            if len(tmp) != 4:
                 return FanSensorPair.get_response(error='Incorrect table value entered.')
-            ttable.append([int(tmp[0]), int(tmp[1])])
+            if int(tmp[2]) < 0 or int(tmp[2]) > 100 or int(tmp[3]) < 0 or int(tmp[3]) > 100:
+                return FanSensorPair.get_response(error='Temperature is below 0 or above 100.')
+            tmp_table.append([int(tmp[0]), int(tmp[1]), int(tmp[2]), int(tmp[3])])
 
-        print(ttable)
-        if not self.update_fs_pair(ttable):
-            return FanSensorPair.get_response(error='remote save Fan&Sensor Table failed.')
-
+        status = self.update_fs_pair(tmp_table)
+        if status == -1:
+            return FanSensorPair.get_response(error='Remote save Fan&Sensor Table failed, please check GPIO num.')
+        elif status != len(tmp_table):
+            return FanSensorPair.get_response(error='Remote save Fan&Sensor Table failed.')
         return FanSensorPair.get_response(success='The Fan&Sensor table update is complete.')
 
     def update_fs_pair(self, ttable):
-        ostream = create_OStream(50)
+        ostream = out_stream(50)
         ostream.write_byte(len(ttable))
         for i in ttable:
             ostream.write_byte(i[0])
             ostream.write_byte(i[1])
-        status = uart_send(ostream).read_byte()
-        return status == len(ttable)
+            ostream.write_byte(i[2])
+            ostream.write_byte(i[3])
+        istream = uart_send(ostream)
+        istream.print_hex()
+        return istream.read_byte()
 
     @staticmethod
     def get_response(arr=[], error="", success=""):
-        istream = uart_send(create_OStream(51))
-        istream.print_hex()
+        istream = uart_send(out_stream(51))
         rt = []
         size = istream.read_byte()
         for i in range(size):
-            tmp = [-1, -1]
+            tmp = [-1, -1, 50, 50]
             tmp[0], tmp[1] = istream.read_byte(), istream.read_byte()
+            tmp[2], tmp[3] = istream.read_byte(), istream.read_byte()
             rt.append(tmp)
 
         info = {'title': 'Fan & Sensor Pair', 'table': FanSensorPair.create_str_table(rt),
@@ -178,7 +181,7 @@ class FanSensorPair:
     def create_str_table(arr, head=True):
         ret = ""
         if head:
-            ret = '        Fan  Sensor\r\n    |--------------\r\n'
+            ret = '        Fan  Sensor  Start  Reset\r\n    |----------------------------\r\n'
         for i in range(len(arr)):
             if head:
                 ret += '{0: >5}'.format(str(i + 1) + '|')
